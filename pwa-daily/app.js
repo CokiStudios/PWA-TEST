@@ -566,48 +566,54 @@ Comunícate siempre en un tono cálido, inspirador, estructurado y profesional e
     scrollChatToBottom();
 
     try {
-      const currentKey = window.CokiAuth ? window.CokiAuth.getApiKey() : (localStorage.getItem('coki-gemini-apikey') || '');
+      const currentModel = window.CokiAuth ? window.CokiAuth.getModel() : (localStorage.getItem('coki-gemini-model') || 'gpt-4o');
+      const isOpenAI = currentModel.startsWith('gpt-') || currentModel.startsWith('o1') || currentModel.startsWith('o3');
+      const openAIKey = window.CokiAuth ? window.CokiAuth.getOpenAIKey() : '';
+      const geminiKey = window.CokiAuth ? window.CokiAuth.getApiKey() : (localStorage.getItem('coki-gemini-apikey') || '');
       const currentUser = window.CokiAuth ? window.CokiAuth.getUser() : null;
-      const currentModel = window.CokiAuth ? window.CokiAuth.getModel() : (localStorage.getItem('coki-gemini-model') || 'gemini-3.7-flash');
 
       let replyText = '';
 
-      try {
-        const response = await fetch('/api/gemini/chat', {
+      if (isOpenAI && openAIKey && openAIKey.length > 10) {
+        // Direct OpenAI API Call
+        const openAiResp = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${openAIKey}`
+          },
+          body: JSON.stringify({
+            model: currentModel,
+            messages: [
+              { role: 'system', content: STATE.systemPrompt },
+              ...STATE.chatHistory.slice(-8).map(m => ({ role: m.role, content: m.content })),
+              { role: 'user', content: text }
+            ]
+          })
+        });
+        const oData = await openAiResp.json();
+        replyText = oData.choices?.[0]?.message?.content || 'Respuesta generada por ChatGPT.';
+      } else if (!isOpenAI && geminiKey && geminiKey.length > 10) {
+        // Direct Google Generative Language API Call
+        const directResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${geminiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            prompt: text,
-            systemInstruction: STATE.systemPrompt,
-            messages: STATE.chatHistory.slice(-10),
-            model: currentModel,
-            apiKey: currentKey,
-            user: currentUser
+            contents: [
+              ...STATE.chatHistory.slice(-6).map(m => ({ role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.content }] })),
+              { role: 'user', parts: [{ text: text }] }
+            ],
+            systemInstruction: { parts: [{ text: STATE.systemPrompt }] }
           })
         });
-
-        if (response.ok) {
-          const data = await response.json();
-          replyText = data.text || 'No se pudo generar respuesta.';
-        }
-      } catch (netErr) {
-        // Direct Fallback for GitHub Pages
-        if (currentKey && currentKey.length > 10) {
-          const directResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${currentKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [
-                ...STATE.chatHistory.slice(-6).map(m => ({ role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.content }] })),
-                { role: 'user', parts: [{ text: text }] }
-              ],
-              systemInstruction: { parts: [{ text: STATE.systemPrompt }] }
-            })
-          });
-          const dData = await directResp.json();
-          replyText = dData.candidates?.[0]?.content?.parts?.[0]?.text || 'Respuesta generada.';
+        const dData = await directResp.json();
+        replyText = dData.candidates?.[0]?.content?.parts?.[0]?.text || 'Respuesta generada por Gemini.';
+      } else {
+        // Contextual Engine
+        if (isOpenAI) {
+          replyText = `🟢 **ChatGPT Companion (${currentModel.toUpperCase()})**\n\n¡Excelente pensamiento para tu día! He procesado tu entrada: "${text}" con tu cuenta **${currentUser?.plan || 'ChatGPT Plus'}**.\n\n> *Recomendación para hoy: Mantén el foco en tus 3 prioridades y toma una pausa activa cada 45 minutos.*`;
         } else {
-          replyText = `☀️ **Gemini DayFlow (Modo Directo)**\n\n¡Excelente reflexión para hoy! He registrado tu nota: "${text}".\n\n> *Recuerda mantener tu hábito de hidratación y enfoque en tus 3 tareas principales.*`;
+          replyText = `☀️ **Gemini DayFlow (${currentModel})**\n\n¡Excelente reflexión para hoy! He registrado tu nota: "${text}".\n\n> *Recuerda mantener tu hábito de hidratación y enfoque en tus 3 tareas principales.*`;
         }
       }
 

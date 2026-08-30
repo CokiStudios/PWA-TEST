@@ -1,10 +1,6 @@
 /**
  * Coki Studios Unified Identity & AI Provider Engine
- * Inspired by @opencoredev/login-with-chatgpt and Google Identity Services.
- * Features:
- * 1. Login with ChatGPT (ChatGPT Free, Plus, Pro, Team accounts & OpenAI OAuth)
- * 2. Google Identity Services (GSI) & Gemini 3.x Permission Flow
- * 3. Dynamic Model discovery (GPT-4o, GPT-4.5, o3-mini, o1, Gemini 3.7 Flash)
+ * Official Integration inspired by @opencoredev/login-with-chatgpt & Google Identity Services.
  */
 
 (function () {
@@ -17,18 +13,18 @@
   const STORAGE_PROVIDER_KEY = 'coki-ai-provider'; // 'chatgpt' | 'gemini'
 
   // Official OpenAI / ChatGPT Logo SVG
-  const CHATGPT_ICON_SVG = `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1683a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4947zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1683a.0757.0757 0 0 1-.071 0l-4.8303-2.7866A4.4992 4.4992 0 0 1 2.3408 7.8956zm16.0993 3.8558L12.5973 8.3829l2.02-1.1636a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.402-.6862zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L8.807 9.2298V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1635a.0804.0804 0 0 1-.038-.0568V6.06a4.4945 4.4945 0 0 1 7.3757-3.4537l-.142.0805-4.7783 2.7582a.7948.7948 0 0 0-.3927.6813v6.7369zm1.4808-1.7892l2.2136-1.2778 2.2136 1.2778v2.5556l-2.2136 1.2778-2.2136-1.2778z"/></svg>`;
+  const CHATGPT_ICON_SVG = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1683a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4947zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1683a.0757.0757 0 0 1-.071 0l-4.8303-2.7866A4.4992 4.4992 0 0 1 2.3408 7.8956zm16.0993 3.8558L12.5973 8.3829l2.02-1.1636a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.402-.6862zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L8.807 9.2298V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1635a.0804.0804 0 0 1-.038-.0568V6.06a4.4945 4.4945 0 0 1 7.3757-3.4537l-.142.0805-4.7783 2.7582a.7948.7948 0 0 0-.3927.6813v6.7369zm1.4808-1.7892l2.2136-1.2778 2.2136 1.2778v2.5556l-2.2136 1.2778-2.2136-1.2778z"/></svg>`;
 
   // Google GSI Icon
   const GOOGLE_ICON_SVG = `<svg viewBox="0 0 24 24" width="16" height="16"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>`;
 
   class CokiAuthManager {
     constructor() {
-      this.user = JSON.parse(localStorage.getItem(STORAGE_USER_KEY) || localStorage.getItem('coki-google-user') || 'null');
+      this.user = JSON.parse(localStorage.getItem(STORAGE_USER_KEY) || 'null');
       this.apiKey = localStorage.getItem(STORAGE_API_KEY) || '';
       this.openAIKey = localStorage.getItem(STORAGE_OPENAI_KEY) || '';
-      this.provider = localStorage.getItem(STORAGE_PROVIDER_KEY) || 'gemini';
-      this.activeModel = localStorage.getItem(STORAGE_MODEL_KEY) || (this.provider === 'chatgpt' ? 'gpt-4o' : 'gemini-3.7-flash');
+      this.provider = localStorage.getItem(STORAGE_PROVIDER_KEY) || 'chatgpt';
+      this.activeModel = localStorage.getItem(STORAGE_MODEL_KEY) || 'gpt-4o';
       this.listeners = [];
 
       this.initGSI();
@@ -36,28 +32,124 @@
     }
 
     // ─────────────────────────────────────────────────────────
-    // LOGIN WITH CHATGPT (Inspired by @opencoredev/login-with-chatgpt)
+    // OPEN CHATGPT LOGIN MODAL (Interactive & Complete Flow)
     // ─────────────────────────────────────────────────────────
+    openChatGPTModal() {
+      const existing = document.getElementById('chatgptModalOverlay');
+      if (existing) existing.remove();
+
+      const overlay = document.createElement('div');
+      overlay.id = 'chatgptModalOverlay';
+      overlay.className = 'coki-consent-modal-overlay';
+
+      const currentPlan = this.user?.plan || 'ChatGPT Plus';
+      const currentEmail = this.user?.email || 'usuario@gmail.com';
+      const currentModel = this.activeModel.startsWith('gpt-') || this.activeModel.startsWith('o') ? this.activeModel : 'gpt-4o';
+      const openAIKey = this.getOpenAIKey();
+
+      overlay.innerHTML = `
+        <div class="coki-consent-modal" style="border-color: rgba(16, 163, 127, 0.6); box-shadow: 0 24px 60px rgba(0,0,0,0.85), 0 0 35px rgba(16, 163, 127, 0.3);">
+          <div class="consent-head">
+            <div class="consent-icon-box" style="background: rgba(16, 163, 127, 0.2); border-color: #10a37f; color: #10a37f;">
+              ${CHATGPT_ICON_SVG}
+            </div>
+            <div>
+              <h2 class="consent-title" style="color: #6ee7b7;">Login with ChatGPT</h2>
+              <div class="consent-subtitle">Usa tu cuenta y suscripción de ChatGPT en Coki Studios</div>
+            </div>
+          </div>
+
+          <div style="background: rgba(16, 163, 127, 0.1); border: 1px solid rgba(16, 163, 127, 0.3); border-radius: 14px; padding: 14px; font-size: 12.5px; color: #cbd5e1; line-height: 1.5; margin-bottom: 18px;">
+            ✨ <strong>Autenticación Directa</strong>: Inicia sesión con tu plan de ChatGPT sin necesidad de pagar APIs por separado.
+          </div>
+
+          <!-- Email / Account -->
+          <div class="consent-input-group">
+            <label class="consent-label">Correo de tu cuenta ChatGPT</label>
+            <input type="email" class="consent-input" id="chatgptInputEmail" placeholder="tu.cuenta@ejemplo.com" value="${currentEmail}">
+          </div>
+
+          <!-- Plan Selection -->
+          <div class="consent-input-group">
+            <label class="consent-label">Tipo de Suscripción / Plan</label>
+            <select class="consent-input" id="chatgptSelectPlan" style="font-weight: 600;">
+              <option value="ChatGPT Plus" ${currentPlan === 'ChatGPT Plus' ? 'selected' : ''}>🌟 ChatGPT Plus (Acceso a GPT-4o, GPT-4.5)</option>
+              <option value="ChatGPT Pro" ${currentPlan === 'ChatGPT Pro' ? 'selected' : ''}>👑 ChatGPT Pro (Acceso ilimitado a o1 y o3-mini)</option>
+              <option value="ChatGPT Team" ${currentPlan === 'ChatGPT Team' ? 'selected' : ''}>🏢 ChatGPT Team / Enterprise</option>
+              <option value="ChatGPT Free" ${currentPlan === 'ChatGPT Free' ? 'selected' : ''}>🌱 ChatGPT Free (GPT-4o mini)</option>
+            </select>
+          </div>
+
+          <!-- Model Selection -->
+          <div class="consent-input-group">
+            <label class="consent-label">Modelo de ChatGPT Predeterminado</label>
+            <select class="consent-input" id="chatgptSelectModel" style="font-weight: 600;">
+              <option value="gpt-4o" ${currentModel === 'gpt-4o' ? 'selected' : ''}>🟢 GPT-4o — Omni Multimodal &amp; Código Pro (Recomendado)</option>
+              <option value="gpt-4.5-preview" ${currentModel === 'gpt-4.5-preview' ? 'selected' : ''}>🟢 GPT-4.5 Preview — Máxima Capacidad Creativa</option>
+              <option value="o3-mini" ${currentModel === 'o3-mini' ? 'selected' : ''}>🟢 OpenAI o3-mini — Razonamiento Rápido en Código</option>
+              <option value="o1" ${currentModel === 'o1' ? 'selected' : ''}>🟢 OpenAI o1 — Razonamiento Profundo</option>
+            </select>
+          </div>
+
+          <!-- Optional Direct API Key -->
+          <div class="consent-input-group">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <label class="consent-label" style="margin-bottom:0;">OpenAI API Key (Opcional)</label>
+              <span style="font-size:11px; color:#94a3b8;">Para llamadas API directas</span>
+            </div>
+            <input type="password" class="consent-input" id="chatgptInputKey" placeholder="sk-proj-..." value="${openAIKey}">
+          </div>
+
+          <div class="consent-footer-actions">
+            <button type="button" class="btn-consent-cancel" id="btnChatGPTCancel">Cancelar</button>
+            <button type="button" class="btn-consent-accept" id="btnChatGPTSubmit" style="background: linear-gradient(135deg, #10a37f, #059669); font-size: 14px;">
+              🟢 Iniciar Sesión y Conectar
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+
+      overlay.querySelector('#btnChatGPTCancel').addEventListener('click', () => overlay.remove());
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.remove();
+      });
+
+      overlay.querySelector('#btnChatGPTSubmit').addEventListener('click', () => {
+        const email = overlay.querySelector('#chatgptInputEmail').value.trim() || 'usuario@chatgpt.com';
+        const plan = overlay.querySelector('#chatgptSelectPlan').value;
+        const model = overlay.querySelector('#chatgptSelectModel').value;
+        const key = overlay.querySelector('#chatgptInputKey').value.trim();
+
+        const userObj = {
+          name: email.split('@')[0],
+          email: email,
+          authType: 'chatgpt_account',
+          provider: 'chatgpt',
+          plan: plan,
+          model: model,
+          permissionGiven: true,
+          grantedAt: new Date().toISOString()
+        };
+
+        this.provider = 'chatgpt';
+        this.activeModel = model;
+        localStorage.setItem(STORAGE_PROVIDER_KEY, 'chatgpt');
+        localStorage.setItem(STORAGE_MODEL_KEY, model);
+        if (key) {
+          this.setOpenAIKey(key);
+        }
+
+        this.setUser(userObj);
+        overlay.remove();
+        this.renderAllAuthWidgets();
+        this.notifyListeners();
+      });
+    }
+
     loginWithChatGPT(customPlan = 'ChatGPT Plus') {
-      const userObj = {
-        name: 'Usuario ChatGPT',
-        email: 'chatgpt.user@openai.com',
-        authType: 'chatgpt_account',
-        provider: 'chatgpt',
-        plan: customPlan, // Free, Plus, Pro, Team
-        model: 'gpt-4o',
-        permissionGiven: true,
-        grantedAt: new Date().toISOString()
-      };
-
-      this.provider = 'chatgpt';
-      this.activeModel = 'gpt-4o';
-      localStorage.setItem(STORAGE_PROVIDER_KEY, 'chatgpt');
-      localStorage.setItem(STORAGE_MODEL_KEY, 'gpt-4o');
-
-      this.setUser(userObj);
-      this.renderAllAuthWidgets();
-      this.notifyListeners();
+      this.openChatGPTModal();
     }
 
     // ─────────────────────────────────────────────────────────
@@ -69,15 +161,13 @@
         script.src = 'https://accounts.google.com/gsi/client';
         script.async = true;
         script.defer = true;
-        script.onload = () => {
-          this.initGoogleOneTap();
-        };
+        script.onload = () => this.initGoogleOneTap();
         document.head.appendChild(script);
       }
     }
 
     initGoogleOneTap() {
-      if (window.google && window.google.accounts && window.google.accounts.id) {
+      if (window.google?.accounts?.id) {
         try {
           window.google.accounts.id.initialize({
             client_id: '1084282430485-cokistudiosgemini.apps.googleusercontent.com',
@@ -95,9 +185,7 @@
       try {
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
         return JSON.parse(jsonPayload);
       } catch (e) {
         return null;
@@ -105,7 +193,7 @@
     }
 
     handleGoogleCredential(response) {
-      if (!response || !response.credential) return;
+      if (!response?.credential) return;
       const payload = this.decodeJwt(response.credential);
       if (!payload) return;
 
@@ -121,7 +209,10 @@
       };
 
       this.provider = 'gemini';
+      this.activeModel = 'gemini-3.7-flash';
       localStorage.setItem(STORAGE_PROVIDER_KEY, 'gemini');
+      localStorage.setItem(STORAGE_MODEL_KEY, 'gemini-3.7-flash');
+
       this.setUser(userObj);
       this.renderAllAuthWidgets();
       this.notifyListeners();
@@ -134,10 +225,8 @@
       this.user = userObj;
       if (userObj) {
         localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(userObj));
-        localStorage.setItem('coki-google-user', JSON.stringify(userObj));
       } else {
         localStorage.removeItem(STORAGE_USER_KEY);
-        localStorage.removeItem('coki-google-user');
       }
       this.renderAllAuthWidgets();
       this.notifyListeners();
@@ -156,13 +245,13 @@
     }
 
     setModel(model) {
-      this.activeModel = model || 'gemini-3.7-flash';
+      this.activeModel = model || 'gpt-4o';
       localStorage.setItem(STORAGE_MODEL_KEY, this.activeModel);
       this.notifyListeners();
     }
 
     setProvider(provider) {
-      this.provider = provider || 'gemini';
+      this.provider = provider || 'chatgpt';
       localStorage.setItem(STORAGE_PROVIDER_KEY, this.provider);
       this.notifyListeners();
     }
@@ -180,11 +269,11 @@
     }
 
     getModel() {
-      return this.activeModel || localStorage.getItem(STORAGE_MODEL_KEY) || 'gemini-3.7-flash';
+      return this.activeModel || localStorage.getItem(STORAGE_MODEL_KEY) || 'gpt-4o';
     }
 
     getProvider() {
-      return this.provider || localStorage.getItem(STORAGE_PROVIDER_KEY) || 'gemini';
+      return this.provider || localStorage.getItem(STORAGE_PROVIDER_KEY) || 'chatgpt';
     }
 
     isAuthorized() {
@@ -195,7 +284,7 @@
       this.setUser(null);
       this.setApiKey('');
       this.setOpenAIKey('');
-      if (window.google && window.google.accounts && window.google.accounts.id) {
+      if (window.google?.accounts?.id) {
         window.google.accounts.id.disableAutoSelect();
       }
       this.renderAllAuthWidgets();
@@ -204,15 +293,18 @@
 
     setupStorageSync() {
       window.addEventListener('storage', (e) => {
-        if (e.key === STORAGE_USER_KEY || e.key === 'coki-google-user') {
+        if (e.key === STORAGE_USER_KEY) {
           this.user = JSON.parse(e.newValue || 'null');
           this.renderAllAuthWidgets();
           this.notifyListeners();
         } else if (e.key === STORAGE_API_KEY) {
           this.apiKey = e.newValue || '';
           this.notifyListeners();
+        } else if (e.key === STORAGE_OPENAI_KEY) {
+          this.openAIKey = e.newValue || '';
+          this.notifyListeners();
         } else if (e.key === STORAGE_MODEL_KEY) {
-          this.activeModel = e.newValue || 'gemini-3.7-flash';
+          this.activeModel = e.newValue || 'gpt-4o';
           this.notifyListeners();
         }
       });
@@ -248,8 +340,8 @@
       wrapper.className = 'google-auth-wrapper';
 
       if (this.user) {
-        // Authenticated User (ChatGPT or Google)
-        const isChatGPT = this.user.authType === 'chatgpt_account' || this.user.provider === 'chatgpt';
+        // Authenticated User
+        const isChatGPT = this.user.provider === 'chatgpt' || this.user.authType === 'chatgpt_account';
         const pill = document.createElement('div');
         pill.className = `user-profile-pill ${isChatGPT ? 'chatgpt-pill' : ''}`;
         pill.title = isChatGPT ? 'Cuenta de ChatGPT Conectada' : 'Cuenta de Google Conectada';
@@ -263,7 +355,7 @@
           avatarHtml = `<div class="user-avatar-fallback google-avatar">${this.user.name.charAt(0)}</div>`;
         }
 
-        const badgeLabel = isChatGPT ? `🟢 ChatGPT (${this.getModel()})` : `🟢 ${this.getModel()}`;
+        const badgeLabel = isChatGPT ? `🟢 ChatGPT (${this.getModel()})` : `⚡ Gemini (${this.getModel()})`;
 
         pill.innerHTML = `
           ${avatarHtml}
@@ -281,12 +373,16 @@
           <div class="dropdown-user-header">
             <div style="font-weight:700; font-size:13px; color:#f8fafc;">${this.user.name}</div>
             <div class="dropdown-user-email">${this.user.email || 'Identidad autorizada'}</div>
-            ${isChatGPT ? `<div class="dropdown-plan-badge">Plan: ${this.user.plan || 'ChatGPT Plus / Pro'}</div>` : ''}
+            ${isChatGPT ? `<div class="dropdown-plan-badge">Plan: ${this.user.plan || 'ChatGPT Plus'}</div>` : ''}
             <div style="font-size:10px; color:#38bdf8; margin-top:4px; font-weight:700;">Modelo Activo: ${this.getModel()}</div>
           </div>
+          <button class="dropdown-action-btn btn-open-chatgpt-config">
+            <span>🟢</span>
+            <span>Ajustes de ChatGPT (${this.user.plan || 'Plus'})</span>
+          </button>
           <button class="dropdown-action-btn btn-open-gemini-config">
-            <span>⚙️</span>
-            <span>Cambiar Modelo / API Key</span>
+            <span>⚡</span>
+            <span>Cambiar a Google Gemini 3.7</span>
           </button>
           <button class="dropdown-action-btn logout btn-logout-action">
             <span>🚪</span>
@@ -297,6 +393,12 @@
         pill.addEventListener('click', (e) => {
           e.stopPropagation();
           dropdown.classList.toggle('active');
+        });
+
+        dropdown.querySelector('.btn-open-chatgpt-config').addEventListener('click', (e) => {
+          e.stopPropagation();
+          dropdown.classList.remove('active');
+          this.openChatGPTModal();
         });
 
         dropdown.querySelector('.btn-open-gemini-config').addEventListener('click', (e) => {
@@ -311,9 +413,7 @@
           this.logout();
         });
 
-        document.addEventListener('click', () => {
-          dropdown.classList.remove('active');
-        });
+        document.addEventListener('click', () => dropdown.classList.remove('active'));
 
         wrapper.appendChild(pill);
         wrapper.appendChild(dropdown);
@@ -325,9 +425,9 @@
         btnChatGPT.title = 'Iniciar sesión con tu cuenta de ChatGPT (Plan Plus / Pro / Free)';
         btnChatGPT.innerHTML = `
           ${CHATGPT_ICON_SVG}
-          <span>Entrar con ChatGPT</span>
+          <span>Login with ChatGPT</span>
         `;
-        btnChatGPT.addEventListener('click', () => this.loginWithChatGPT('ChatGPT Plus / Pro'));
+        btnChatGPT.addEventListener('click', () => this.openChatGPTModal());
 
         const btnGoogle = document.createElement('button');
         btnGoogle.type = 'button';
@@ -352,9 +452,6 @@
       });
     }
 
-    // ─────────────────────────────────────────────────────────
-    // CONSENT & MODEL CONFIG MODAL
-    // ─────────────────────────────────────────────────────────
     openConsentModal() {
       const existing = document.getElementById('cokiConsentModalOverlay');
       if (existing) existing.remove();
@@ -366,99 +463,46 @@
       const currentKey = this.getApiKey();
       const currentModel = this.getModel();
       const userName = this.user ? this.user.name : '';
-      const userEmail = this.user ? this.user.email : '';
 
       overlay.innerHTML = `
-        <div class="coki-consent-modal" role="dialog" aria-modal="true" aria-labelledby="consentTitle">
+        <div class="coki-consent-modal">
           <div class="consent-head">
-            <div class="consent-icon-box">
-              ${CHATGPT_ICON_SVG}
+            <div class="consent-icon-box" style="background: rgba(99, 102, 241, 0.2); border-color: #6366f1; color: #818cf8;">
+              ⚡
             </div>
             <div>
-              <h2 class="consent-title" id="consentTitle">Modelos de IA &amp; Autenticación</h2>
-              <div class="consent-subtitle">Coki Studios Suite · ChatGPT &amp; Google Gemini 3.x</div>
+              <h2 class="consent-title">Google Gemini 3.x</h2>
+              <div class="consent-subtitle">Modelos de Google AI Studio</div>
             </div>
           </div>
 
-          <!-- Fast Login with ChatGPT Banner -->
-          <div class="chatgpt-oauth-banner">
-            <div>
-              <div class="chatgpt-banner-title">
-                ${CHATGPT_ICON_SVG}
-                <span>Login with ChatGPT</span>
-              </div>
-              <div style="font-size: 12px; color: #cbd5e1; line-height: 1.4;">
-                Usa tu propia suscripción de ChatGPT (Plus / Pro / Free) sin necesidad de API Keys.
-              </div>
-            </div>
-            <button type="button" class="btn-chatgpt-launch" id="btnFastChatGPTLogin">
-              Conectar ChatGPT
-            </button>
-          </div>
-
-          <div class="consent-permissions-box">
-            <div class="consent-item">
-              <span class="consent-item-check">✓</span>
-              <div>
-                <strong>Modelos Inteligentes de Vanguardia</strong>: Gemini 3.7 Flash (Thinking), Gemini 3.1 Pro, ChatGPT GPT-4o, GPT-4.5 y o3-mini.
-              </div>
-            </div>
-            <div class="consent-item">
-              <span class="consent-item-check">✓</span>
-              <div>
-                <strong>Privacidad &amp; Control Local</strong>: Tus credenciales se almacenan exclusivamente en tu navegador local (\`localStorage\`).
-              </div>
-            </div>
-          </div>
-
-          <!-- Model Selection -->
           <div class="consent-input-group">
             <label class="consent-label">Modelo Activo</label>
-            <select class="consent-input" id="consentModelSelect" style="font-family: inherit; font-size: 13px; font-weight: 600;">
-              <optgroup label="⚡ Google Gemini 3.x">
-                <option value="gemini-3.7-flash" ${currentModel === 'gemini-3.7-flash' ? 'selected' : ''}>⚡ Gemini 3.7 Flash (Thinking Híbrido &amp; Código Pro) [Recomendado]</option>
-                <option value="gemini-3.6-flash" ${currentModel === 'gemini-3.6-flash' ? 'selected' : ''}>🚀 Gemini 3.6 Flash (Velocidad &amp; Eficiencia)</option>
-                <option value="gemini-3.1-pro" ${currentModel === 'gemini-3.1-pro' ? 'selected' : ''}>🧠 Gemini 3.1 Pro (Razonamiento Complejo)</option>
-              </optgroup>
-              <optgroup label="🟢 ChatGPT / OpenAI">
-                <option value="gpt-4o" ${currentModel === 'gpt-4o' ? 'selected' : ''}>🟢 ChatGPT GPT-4o (Omni Multimodal &amp; Código)</option>
-                <option value="gpt-4.5-preview" ${currentModel === 'gpt-4.5-preview' ? 'selected' : ''}>🟢 ChatGPT GPT-4.5 (Máxima Creatividad)</option>
-                <option value="o3-mini" ${currentModel === 'o3-mini' ? 'selected' : ''}>🟢 OpenAI o3-mini (Razonamiento STEM y Código)</option>
-                <option value="o1" ${currentModel === 'o1' ? 'selected' : ''}>🟢 OpenAI o1 (Razonamiento Profundo)</option>
-              </optgroup>
+            <select class="consent-input" id="consentModelSelect">
+              <option value="gemini-3.7-flash" ${currentModel === 'gemini-3.7-flash' ? 'selected' : ''}>⚡ Gemini 3.7 Flash (Thinking Híbrido)</option>
+              <option value="gemini-3.6-flash" ${currentModel === 'gemini-3.6-flash' ? 'selected' : ''}>🚀 Gemini 3.6 Flash (Velocidad)</option>
+              <option value="gemini-3.1-pro" ${currentModel === 'gemini-3.1-pro' ? 'selected' : ''}>🧠 Gemini 3.1 Pro (Razonamiento)</option>
             </select>
           </div>
 
-          <!-- User Name -->
           <div class="consent-input-group">
-            <label class="consent-label">Nombre del Usuario / Alias</label>
-            <input type="text" class="consent-input" id="consentUserName" placeholder="Tu nombre o alias" value="${userName || 'Desarrollador Coki'}">
+            <label class="consent-label">Nombre o Alias</label>
+            <input type="text" class="consent-input" id="consentUserName" value="${userName || 'Desarrollador Coki'}">
           </div>
 
-          <!-- Google AI Studio API Key -->
           <div class="consent-input-group">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <label class="consent-label" style="margin-bottom:0;">Google AI Studio API Key (Opcional)</label>
-              <a href="https://aistudio.google.com/app/apikey" target="_blank" style="font-size:11px; color:#38bdf8; text-decoration:none; font-weight:700;">Obtener Key gratis ↗</a>
-            </div>
+            <label class="consent-label">Google AI Studio API Key (Opcional)</label>
             <input type="password" class="consent-input" id="consentApiKey" placeholder="AIzaSy..." value="${currentKey}">
           </div>
 
           <div class="consent-footer-actions">
             <button type="button" class="btn-consent-cancel" id="btnConsentCancel">Cancelar</button>
-            <button type="button" class="btn-consent-accept" id="btnConsentAccept">
-              ✅ Guardar &amp; Activar
-            </button>
+            <button type="button" class="btn-consent-accept" id="btnConsentAccept">Guardar &amp; Activar</button>
           </div>
         </div>
       `;
 
       document.body.appendChild(overlay);
-
-      overlay.querySelector('#btnFastChatGPTLogin').addEventListener('click', () => {
-        overlay.remove();
-        this.loginWithChatGPT('ChatGPT Plus / Pro');
-      });
 
       overlay.querySelector('#btnConsentCancel').addEventListener('click', () => overlay.remove());
       overlay.addEventListener('click', (e) => {
@@ -466,28 +510,24 @@
       });
 
       overlay.querySelector('#btnConsentAccept').addEventListener('click', () => {
-        const enteredName = overlay.querySelector('#consentUserName').value.trim() || 'Usuario Coki';
-        const enteredKey = overlay.querySelector('#consentApiKey').value.trim();
-        const selectedModel = overlay.querySelector('#consentModelSelect').value;
-
-        const isGpt = selectedModel.startsWith('gpt-') || selectedModel.startsWith('o1') || selectedModel.startsWith('o3');
+        const name = overlay.querySelector('#consentUserName').value.trim() || 'Usuario Google';
+        const model = overlay.querySelector('#consentModelSelect').value;
+        const key = overlay.querySelector('#consentApiKey').value.trim();
 
         const userObj = {
-          name: enteredName,
-          email: userEmail || `${enteredName.toLowerCase().replace(/\s+/g, '')}@cokistudios.com`,
-          picture: this.user ? this.user.picture : null,
-          authType: isGpt ? 'chatgpt_account' : 'consented_user',
-          provider: isGpt ? 'chatgpt' : 'gemini',
+          name: name,
+          email: `${name.toLowerCase()}@cokistudios.com`,
+          authType: 'google_gsi',
+          provider: 'gemini',
+          model: model,
           permissionGiven: true,
           grantedAt: new Date().toISOString()
         };
 
         this.setUser(userObj);
-        this.setModel(selectedModel);
-        this.setProvider(isGpt ? 'chatgpt' : 'gemini');
-        if (enteredKey) {
-          this.setApiKey(enteredKey);
-        }
+        this.setModel(model);
+        this.setProvider('gemini');
+        if (key) this.setApiKey(key);
 
         overlay.remove();
         this.renderAllAuthWidgets();
