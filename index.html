@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="assets/auth.css">
+  <link rel="stylesheet" href="assets/auth.css?v=chatgpt_v8">
   <style>
     :root {
       --bg-dark: #06090f;
@@ -544,7 +544,7 @@
   <section class="hero">
     <div class="hero-badge">
       <span>✨</span>
-      <span>Coki Studios Ecosystem 2.0 · Live MCP &amp; Gemini PWAs</span>
+      <span>Coki Studios Ecosystem 2.0 · Live MCP, Gemini 3.7 &amp; ChatGPT</span>
     </div>
     
     <h1 class="hero-title">
@@ -552,8 +552,32 @@
     </h1>
 
     <p class="hero-subtitle">
-      Dos aplicaciones web progresivas de alta gama con soporte offline, reconocimiento y síntesis de voz, renderizado en vivo y servidor oficial <strong>Hosted Model Context Protocol (MCP)</strong> con transporte SSE y JSON-RPC 2.0.
+      Dos aplicaciones web progresivas de alta gama con soporte offline, reconocimiento de voz y soporte dual para <strong>ChatGPT (GPT-4o / o3-mini)</strong> y <strong>Google Gemini 3.7 Flash</strong>.
     </p>
+
+    <!-- Prominent Login with ChatGPT Bar -->
+    <div style="max-width: 680px; margin: 24px auto 0; background: linear-gradient(135deg, rgba(11, 61, 48, 0.85), rgba(13, 18, 29, 0.95)); border: 1.5px solid rgba(16, 163, 127, 0.6); border-radius: 20px; padding: 18px 24px; box-shadow: 0 12px 36px rgba(16, 163, 127, 0.25); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; text-align: left;">
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(16, 163, 127, 0.2); border: 1px solid rgba(16, 163, 127, 0.5); display: flex; align-items: center; justify-content: center; color: #10a37f;">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1683a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4947zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1683a.0757.0757 0 0 1-.071 0l-4.8303-2.7866A4.4992 4.4992 0 0 1 2.3408 7.8956zm16.0993 3.8558L12.5973 8.3829l2.02-1.1636a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.402-.6862zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L8.807 9.2298V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1635a.0804.0804 0 0 1-.038-.0568V6.06a4.4945 4.4945 0 0 1 7.3757-3.4537l-.142.0805-4.7783 2.7582a.7948.7948 0 0 0-.3927.6813v6.7369zm1.4808-1.7892l2.2136-1.2778 2.2136 1.2778v2.5556l-2.2136 1.2778-2.2136-1.2778z"/></svg>
+        </div>
+        <div>
+          <div style="font-weight: 800; font-size: 15px; color: #6ee7b7; display: flex; align-items: center; gap: 8px;">
+            <span>🟢 Iniciar Sesión con ChatGPT</span>
+            <span style="font-size: 10px; background: rgba(16, 163, 127, 0.3); color: #a7f3d0; padding: 2px 7px; border-radius: 6px; font-weight: 800;">OAUTH / SDK</span>
+          </div>
+          <div style="font-size: 12.5px; color: #94a3b8; margin-top: 2px;">
+            Usa tu suscripción de ChatGPT (Plus / Pro / Free) con GPT-4o, GPT-4.5 y o3-mini sin API Keys.
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <button type="button" class="btn-chatgpt-signin" onclick="if(window.CokiAuth) window.CokiAuth.loginWithChatGPT('ChatGPT Plus / Pro');" style="padding: 9px 18px; font-size: 13.5px;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1683a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4947zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1683a.0757.0757 0 0 1-.071 0l-4.8303-2.7866A4.4992 4.4992 0 0 1 2.3408 7.8956zm16.0993 3.8558L12.5973 8.3829l2.02-1.1636a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.402-.6862zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L8.807 9.2298V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1635a.0804.0804 0 0 1-.038-.0568V6.06a4.4945 4.4945 0 0 1 7.3757-3.4537l-.142.0805-4.7783 2.7582a.7948.7948 0 0 0-.3927.6813v6.7369zm1.4808-1.7892l2.2136-1.2778 2.2136 1.2778v2.5556l-2.2136 1.2778-2.2136-1.2778z"/></svg>
+          <span>Conectar ChatGPT</span>
+        </button>
+      </div>
+    </div>
   </section>
 
   <!-- Main Apps Showcase -->
@@ -774,6 +798,6 @@
     updateMcpLiveStats();
     setInterval(updateMcpLiveStats, 8000);
   </script>
-  <script src="assets/google-auth.js"></script>
+  <script src="assets/google-auth.js?v=chatgpt_v8"></script>
 </body>
 </html>
