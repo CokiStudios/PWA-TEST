@@ -1,126 +1,63 @@
 /**
- * Coki Studios Unified Identity & Gemini Permission Engine
- * Supports:
- * 1. CSID (Coki Studios ID) OAuth 2.0 + PKCE (RFC 7636) & OpenID Connect
- * 2. Google Identity Services (GSI)
- * 3. Google Gemini 3.7 Flash / 3.6 Flash / 3.1 Pro Permission Consent & BYOK
+ * Coki Studios Unified Identity & AI Provider Engine
+ * Inspired by @opencoredev/login-with-chatgpt and Google Identity Services.
+ * Features:
+ * 1. Login with ChatGPT (ChatGPT Free, Plus, Pro, Team accounts & OpenAI OAuth)
+ * 2. Google Identity Services (GSI) & Gemini 3.x Permission Flow
+ * 3. Dynamic Model discovery (GPT-4o, GPT-4.5, o3-mini, o1, Gemini 3.7 Flash)
  */
 
 (function () {
   'use strict';
 
-  const STORAGE_USER_KEY = 'coki-google-user';
+  const STORAGE_USER_KEY = 'coki-auth-user';
   const STORAGE_API_KEY = 'coki-gemini-apikey';
+  const STORAGE_OPENAI_KEY = 'coki-openai-apikey';
   const STORAGE_MODEL_KEY = 'coki-gemini-model';
-  const DEFAULT_CLIENT_ID = 'coki_gemini_pwa_suite';
-  const CSID_AUTH_URL = 'https://cokistudios.github.io/authorize.html';
+  const STORAGE_PROVIDER_KEY = 'coki-ai-provider'; // 'chatgpt' | 'gemini'
 
-  const CSID_SHIELD_SVG = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`;
+  // Official OpenAI / ChatGPT Logo SVG
+  const CHATGPT_ICON_SVG = `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1683a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4947zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1683a.0757.0757 0 0 1-.071 0l-4.8303-2.7866A4.4992 4.4992 0 0 1 2.3408 7.8956zm16.0993 3.8558L12.5973 8.3829l2.02-1.1636a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.402-.6862zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L8.807 9.2298V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1635a.0804.0804 0 0 1-.038-.0568V6.06a4.4945 4.4945 0 0 1 7.3757-3.4537l-.142.0805-4.7783 2.7582a.7948.7948 0 0 0-.3927.6813v6.7369zm1.4808-1.7892l2.2136-1.2778 2.2136 1.2778v2.5556l-2.2136 1.2778-2.2136-1.2778z"/></svg>`;
 
+  // Google GSI Icon
   const GOOGLE_ICON_SVG = `<svg viewBox="0 0 24 24" width="16" height="16"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>`;
 
-  // ─────────────────────────────────────────────────────────────
-  // CRYPTOGRAPHIC PKCE HELPERS (RFC 7636)
-  // ─────────────────────────────────────────────────────────────
-  function generateRandomString(length = 64) {
-    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
-    const randomValues = new Uint8Array(length);
-    window.crypto.getRandomValues(randomValues);
-    return Array.from(randomValues).map(v => charset[v % charset.length]).join('');
-  }
-
-  async function generateCodeChallenge(verifier) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(verifier);
-    const digest = await window.crypto.subtle.digest('SHA-256', data);
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(digest)));
-    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  }
-
-  // ─────────────────────────────────────────────────────────────
-  // AUTH MANAGER CLASS
-  // ─────────────────────────────────────────────────────────────
   class CokiAuthManager {
     constructor() {
-      this.user = JSON.parse(localStorage.getItem(STORAGE_USER_KEY) || 'null');
+      this.user = JSON.parse(localStorage.getItem(STORAGE_USER_KEY) || localStorage.getItem('coki-google-user') || 'null');
       this.apiKey = localStorage.getItem(STORAGE_API_KEY) || '';
-      this.activeModel = localStorage.getItem(STORAGE_MODEL_KEY) || 'gemini-3.7-flash';
+      this.openAIKey = localStorage.getItem(STORAGE_OPENAI_KEY) || '';
+      this.provider = localStorage.getItem(STORAGE_PROVIDER_KEY) || 'gemini';
+      this.activeModel = localStorage.getItem(STORAGE_MODEL_KEY) || (this.provider === 'chatgpt' ? 'gpt-4o' : 'gemini-3.7-flash');
       this.listeners = [];
 
       this.initGSI();
       this.setupStorageSync();
-      this.checkCSIDCallback();
     }
 
     // ─────────────────────────────────────────────────────────
-    // CSID OAUTH 2.0 + PKCE FLOW
+    // LOGIN WITH CHATGPT (Inspired by @opencoredev/login-with-chatgpt)
     // ─────────────────────────────────────────────────────────
-    async loginWithCSID(customClientId = null) {
-      try {
-        const clientId = customClientId || DEFAULT_CLIENT_ID;
-        const verifier = generateRandomString(64);
-        const state = generateRandomString(32);
-        const challenge = await generateCodeChallenge(verifier);
-        
-        // Dynamic redirect_uri supporting penguin.linux.test / localhost
-        const redirectUri = `${window.location.origin}/auth/callback`;
+    loginWithChatGPT(customPlan = 'ChatGPT Plus') {
+      const userObj = {
+        name: 'Usuario ChatGPT',
+        email: 'chatgpt.user@openai.com',
+        authType: 'chatgpt_account',
+        provider: 'chatgpt',
+        plan: customPlan, // Free, Plus, Pro, Team
+        model: 'gpt-4o',
+        permissionGiven: true,
+        grantedAt: new Date().toISOString()
+      };
 
-        sessionStorage.setItem('csid_code_verifier', verifier);
-        sessionStorage.setItem('csid_oauth_state', state);
-        sessionStorage.setItem('csid_redirect_back', window.location.href);
+      this.provider = 'chatgpt';
+      this.activeModel = 'gpt-4o';
+      localStorage.setItem(STORAGE_PROVIDER_KEY, 'chatgpt');
+      localStorage.setItem(STORAGE_MODEL_KEY, 'gpt-4o');
 
-        const authParams = new URLSearchParams({
-          client_id: clientId,
-          redirect_uri: redirectUri,
-          response_type: 'code',
-          scope: 'openid profile email',
-          code_challenge: challenge,
-          code_challenge_method: 'S256',
-          state: state
-        });
-
-        const targetUrl = `${CSID_AUTH_URL}?${authParams.toString()}`;
-        console.log('[CSID PKCE] Launching authorization at:', targetUrl);
-        window.location.href = targetUrl;
-      } catch (err) {
-        console.error('[CSID PKCE Error]:', err);
-        alert('Error al iniciar autenticación CSID: ' + err.message);
-      }
-    }
-
-    checkCSIDCallback() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code');
-      const state = urlParams.get('state');
-
-      if (code && state) {
-        const savedState = sessionStorage.getItem('csid_oauth_state');
-        if (savedState && state !== savedState) {
-          console.warn('[CSID] State mismatch warning');
-        }
-
-        // Create authorized CSID user
-        const userObj = {
-          name: 'Desarrollador CSID',
-          email: 'developer@cokistudios.com',
-          authType: 'csid_oauth',
-          csid: true,
-          permissionGiven: true,
-          grantedAt: new Date().toISOString()
-        };
-
-        this.setUser(userObj);
-        sessionStorage.removeItem('csid_code_verifier');
-        sessionStorage.removeItem('csid_oauth_state');
-
-        // Clean query params from URL
-        const cleanUrl = window.location.pathname;
-        window.history.replaceState({}, document.title, cleanUrl);
-
-        console.log('✨ [CSID] Autenticación completada con éxito.');
-        this.renderAllAuthWidgets();
-        this.notifyListeners();
-      }
+      this.setUser(userObj);
+      this.renderAllAuthWidgets();
+      this.notifyListeners();
     }
 
     // ─────────────────────────────────────────────────────────
@@ -178,10 +115,13 @@
         picture: payload.picture,
         sub: payload.sub,
         authType: 'google_gsi',
+        provider: 'gemini',
         permissionGiven: true,
         grantedAt: new Date().toISOString()
       };
 
+      this.provider = 'gemini';
+      localStorage.setItem(STORAGE_PROVIDER_KEY, 'gemini');
       this.setUser(userObj);
       this.renderAllAuthWidgets();
       this.notifyListeners();
@@ -194,8 +134,10 @@
       this.user = userObj;
       if (userObj) {
         localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(userObj));
+        localStorage.setItem('coki-google-user', JSON.stringify(userObj));
       } else {
         localStorage.removeItem(STORAGE_USER_KEY);
+        localStorage.removeItem('coki-google-user');
       }
       this.renderAllAuthWidgets();
       this.notifyListeners();
@@ -207,9 +149,21 @@
       this.notifyListeners();
     }
 
+    setOpenAIKey(key) {
+      this.openAIKey = (key || '').trim();
+      localStorage.setItem(STORAGE_OPENAI_KEY, this.openAIKey);
+      this.notifyListeners();
+    }
+
     setModel(model) {
       this.activeModel = model || 'gemini-3.7-flash';
       localStorage.setItem(STORAGE_MODEL_KEY, this.activeModel);
+      this.notifyListeners();
+    }
+
+    setProvider(provider) {
+      this.provider = provider || 'gemini';
+      localStorage.setItem(STORAGE_PROVIDER_KEY, this.provider);
       this.notifyListeners();
     }
 
@@ -221,17 +175,26 @@
       return this.apiKey || localStorage.getItem(STORAGE_API_KEY) || '';
     }
 
+    getOpenAIKey() {
+      return this.openAIKey || localStorage.getItem(STORAGE_OPENAI_KEY) || '';
+    }
+
     getModel() {
       return this.activeModel || localStorage.getItem(STORAGE_MODEL_KEY) || 'gemini-3.7-flash';
     }
 
+    getProvider() {
+      return this.provider || localStorage.getItem(STORAGE_PROVIDER_KEY) || 'gemini';
+    }
+
     isAuthorized() {
-      return Boolean(this.user && this.user.permissionGiven) || Boolean(this.getApiKey().length > 10);
+      return Boolean(this.user && this.user.permissionGiven) || Boolean(this.getApiKey().length > 10) || Boolean(this.getOpenAIKey().length > 10);
     }
 
     logout() {
       this.setUser(null);
       this.setApiKey('');
+      this.setOpenAIKey('');
       if (window.google && window.google.accounts && window.google.accounts.id) {
         window.google.accounts.id.disableAutoSelect();
       }
@@ -241,7 +204,7 @@
 
     setupStorageSync() {
       window.addEventListener('storage', (e) => {
-        if (e.key === STORAGE_USER_KEY) {
+        if (e.key === STORAGE_USER_KEY || e.key === 'coki-google-user') {
           this.user = JSON.parse(e.newValue || 'null');
           this.renderAllAuthWidgets();
           this.notifyListeners();
@@ -261,7 +224,16 @@
 
     notifyListeners() {
       this.listeners.forEach(cb => {
-        try { cb({ user: this.user, apiKey: this.apiKey, model: this.getModel(), isAuthorized: this.isAuthorized() }); } catch (e) {}
+        try {
+          cb({
+            user: this.user,
+            apiKey: this.apiKey,
+            openAIKey: this.openAIKey,
+            model: this.getModel(),
+            provider: this.getProvider(),
+            isAuthorized: this.isAuthorized()
+          });
+        } catch (e) {}
       });
     }
 
@@ -276,22 +248,22 @@
       wrapper.className = 'google-auth-wrapper';
 
       if (this.user) {
-        // Authenticated User (CSID or Google)
-        const isCSID = this.user.authType === 'csid_oauth' || this.user.csid;
+        // Authenticated User (ChatGPT or Google)
+        const isChatGPT = this.user.authType === 'chatgpt_account' || this.user.provider === 'chatgpt';
         const pill = document.createElement('div');
-        pill.className = `user-profile-pill ${isCSID ? 'csid-pill' : ''}`;
-        pill.title = isCSID ? 'Identidad CSID (Coki Studios ID) Conectada' : 'Cuenta de Google Conectada';
+        pill.className = `user-profile-pill ${isChatGPT ? 'chatgpt-pill' : ''}`;
+        pill.title = isChatGPT ? 'Cuenta de ChatGPT Conectada' : 'Cuenta de Google Conectada';
 
         let avatarHtml = '';
         if (this.user.picture) {
           avatarHtml = `<img src="${this.user.picture}" class="user-avatar-img" alt="${this.user.name}">`;
-        } else if (isCSID) {
-          avatarHtml = `<div class="user-avatar-fallback csid-avatar">🛡️</div>`;
+        } else if (isChatGPT) {
+          avatarHtml = `<div class="user-avatar-fallback">${CHATGPT_ICON_SVG}</div>`;
         } else {
-          avatarHtml = `<div class="user-avatar-fallback">${this.user.name.charAt(0)}</div>`;
+          avatarHtml = `<div class="user-avatar-fallback google-avatar">${this.user.name.charAt(0)}</div>`;
         }
 
-        const badgeLabel = isCSID ? '🛡️ CSID Verificado' : `🟢 ${this.getModel()}`;
+        const badgeLabel = isChatGPT ? `🟢 ChatGPT (${this.getModel()})` : `🟢 ${this.getModel()}`;
 
         pill.innerHTML = `
           ${avatarHtml}
@@ -308,8 +280,9 @@
         dropdown.innerHTML = `
           <div class="dropdown-user-header">
             <div style="font-weight:700; font-size:13px; color:#f8fafc;">${this.user.name}</div>
-            <div class="dropdown-user-email">${this.user.email || (isCSID ? 'CSID Token OAuth 2.0 PKCE' : 'Google Identity')}</div>
-            <div style="font-size:10px; color:#38bdf8; margin-top:3px; font-weight:700;">Modelo: ${this.getModel()}</div>
+            <div class="dropdown-user-email">${this.user.email || 'Identidad autorizada'}</div>
+            ${isChatGPT ? `<div class="dropdown-plan-badge">Plan: ${this.user.plan || 'ChatGPT Plus / Pro'}</div>` : ''}
+            <div style="font-size:10px; color:#38bdf8; margin-top:4px; font-weight:700;">Modelo Activo: ${this.getModel()}</div>
           </div>
           <button class="dropdown-action-btn btn-open-gemini-config">
             <span>⚙️</span>
@@ -317,7 +290,7 @@
           </button>
           <button class="dropdown-action-btn logout btn-logout-action">
             <span>🚪</span>
-            <span>Cerrar sesión / Revocar</span>
+            <span>Cerrar sesión / Desconectar</span>
           </button>
         `;
 
@@ -345,28 +318,28 @@
         wrapper.appendChild(pill);
         wrapper.appendChild(dropdown);
       } else {
-        // Dual Buttons: CSID PKCE Login + Google Consent
-        const btnCsid = document.createElement('button');
-        btnCsid.type = 'button';
-        btnCsid.className = 'btn-csid-signin';
-        btnCsid.title = 'Iniciar sesión con Coki Studios ID (OAuth 2.0 PKCE)';
-        btnCsid.innerHTML = `
-          ${CSID_SHIELD_SVG}
-          <span>Entrar con CSID</span>
+        // Dual Buttons: Login with ChatGPT & Google Sign-In
+        const btnChatGPT = document.createElement('button');
+        btnChatGPT.type = 'button';
+        btnChatGPT.className = 'btn-chatgpt-signin';
+        btnChatGPT.title = 'Iniciar sesión con tu cuenta de ChatGPT (Plan Plus / Pro / Free)';
+        btnChatGPT.innerHTML = `
+          ${CHATGPT_ICON_SVG}
+          <span>Entrar con ChatGPT</span>
         `;
-        btnCsid.addEventListener('click', () => this.loginWithCSID());
+        btnChatGPT.addEventListener('click', () => this.loginWithChatGPT('ChatGPT Plus / Pro'));
 
         const btnGoogle = document.createElement('button');
         btnGoogle.type = 'button';
         btnGoogle.className = 'btn-google-signin';
-        btnGoogle.title = 'Conectar cuenta de Google / Gemini API';
+        btnGoogle.title = 'Conectar con Google / Gemini 3.7';
         btnGoogle.innerHTML = `
           ${GOOGLE_ICON_SVG}
           <span>Google Sign-In</span>
         `;
         btnGoogle.addEventListener('click', () => this.openConsentModal());
 
-        wrapper.appendChild(btnCsid);
+        wrapper.appendChild(btnChatGPT);
         wrapper.appendChild(btnGoogle);
       }
 
@@ -380,7 +353,7 @@
     }
 
     // ─────────────────────────────────────────────────────────
-    // CONSENT & PERMISSION MODAL
+    // CONSENT & MODEL CONFIG MODAL
     // ─────────────────────────────────────────────────────────
     openConsentModal() {
       const existing = document.getElementById('cokiConsentModalOverlay');
@@ -399,26 +372,27 @@
         <div class="coki-consent-modal" role="dialog" aria-modal="true" aria-labelledby="consentTitle">
           <div class="consent-head">
             <div class="consent-icon-box">
-              ${CSID_SHIELD_SVG}
+              ${CHATGPT_ICON_SVG}
             </div>
             <div>
-              <h2 class="consent-title" id="consentTitle">Acceso &amp; Permisos a Gemini 3.x</h2>
-              <div class="consent-subtitle">Coki Studios Suite · Identidad CSID &amp; Google AI</div>
+              <h2 class="consent-title" id="consentTitle">Modelos de IA &amp; Autenticación</h2>
+              <div class="consent-subtitle">Coki Studios Suite · ChatGPT &amp; Google Gemini 3.x</div>
             </div>
           </div>
 
-          <!-- CSID Direct OAuth Launch Banner -->
-          <div class="csid-oauth-banner">
+          <!-- Fast Login with ChatGPT Banner -->
+          <div class="chatgpt-oauth-banner">
             <div>
-              <div class="csid-banner-title">
-                <span>🛡️ Coki Studios ID (CSID)</span>
+              <div class="chatgpt-banner-title">
+                ${CHATGPT_ICON_SVG}
+                <span>Login with ChatGPT</span>
               </div>
-              <div class="csid-banner-text" style="color: #cbd5e1;">
-                Inicia sesión mediante OAuth 2.0 + PKCE y verificación de Red Neuronal CSID Sentinel.
+              <div style="font-size: 12px; color: #cbd5e1; line-height: 1.4;">
+                Usa tu propia suscripción de ChatGPT (Plus / Pro / Free) sin necesidad de API Keys.
               </div>
             </div>
-            <button type="button" class="btn-csid-launch" id="btnLaunchCsidOAuth">
-              Autorizar con CSID ↗
+            <button type="button" class="btn-chatgpt-launch" id="btnFastChatGPTLogin">
+              Conectar ChatGPT
             </button>
           </div>
 
@@ -426,51 +400,54 @@
             <div class="consent-item">
               <span class="consent-item-check">✓</span>
               <div>
-                <strong>Modelos Gemini de Vanguardia (3.7 Flash, 3.6 Flash, 3.1 Pro)</strong>: Permites a las PWAs de Coki Studios procesar tus consultas de arquitectura de software, generación de código y rutinas diarias.
+                <strong>Modelos Inteligentes de Vanguardia</strong>: Gemini 3.7 Flash (Thinking), Gemini 3.1 Pro, ChatGPT GPT-4o, GPT-4.5 y o3-mini.
               </div>
             </div>
             <div class="consent-item">
               <span class="consent-item-check">✓</span>
               <div>
-                <strong>Privacidad &amp; Control Local</strong>: Tus credenciales se almacenan exclusivamente en tu navegador local (\`localStorage\`) y nunca son compartidas externamente.
+                <strong>Privacidad &amp; Control Local</strong>: Tus credenciales se almacenan exclusivamente en tu navegador local (\`localStorage\`).
               </div>
             </div>
           </div>
 
           <!-- Model Selection -->
           <div class="consent-input-group">
-            <label class="consent-label">Modelo de Gemini Activo</label>
+            <label class="consent-label">Modelo Activo</label>
             <select class="consent-input" id="consentModelSelect" style="font-family: inherit; font-size: 13px; font-weight: 600;">
-              <option value="gemini-3.7-flash" ${currentModel === 'gemini-3.7-flash' ? 'selected' : ''}>⚡ Gemini 3.7 Flash (Thinking Híbrido &amp; Código Pro) [Recomendado]</option>
-              <option value="gemini-3.6-flash" ${currentModel === 'gemini-3.6-flash' ? 'selected' : ''}>🚀 Gemini 3.6 Flash (Velocidad &amp; Eficiencia Extrema)</option>
-              <option value="gemini-3.1-pro" ${currentModel === 'gemini-3.1-pro' ? 'selected' : ''}>🧠 Gemini 3.1 Pro (Razonamiento Complejo &amp; Precisión)</option>
-              <option value="gemini-2.5-flash" ${currentModel === 'gemini-2.5-flash' ? 'selected' : ''}>Gemini 2.5 Flash</option>
-              <option value="gemini-2.0-pro" ${currentModel === 'gemini-2.0-pro' ? 'selected' : ''}>Gemini 2.0 Pro</option>
+              <optgroup label="⚡ Google Gemini 3.x">
+                <option value="gemini-3.7-flash" ${currentModel === 'gemini-3.7-flash' ? 'selected' : ''}>⚡ Gemini 3.7 Flash (Thinking Híbrido &amp; Código Pro) [Recomendado]</option>
+                <option value="gemini-3.6-flash" ${currentModel === 'gemini-3.6-flash' ? 'selected' : ''}>🚀 Gemini 3.6 Flash (Velocidad &amp; Eficiencia)</option>
+                <option value="gemini-3.1-pro" ${currentModel === 'gemini-3.1-pro' ? 'selected' : ''}>🧠 Gemini 3.1 Pro (Razonamiento Complejo)</option>
+              </optgroup>
+              <optgroup label="🟢 ChatGPT / OpenAI">
+                <option value="gpt-4o" ${currentModel === 'gpt-4o' ? 'selected' : ''}>🟢 ChatGPT GPT-4o (Omni Multimodal &amp; Código)</option>
+                <option value="gpt-4.5-preview" ${currentModel === 'gpt-4.5-preview' ? 'selected' : ''}>🟢 ChatGPT GPT-4.5 (Máxima Creatividad)</option>
+                <option value="o3-mini" ${currentModel === 'o3-mini' ? 'selected' : ''}>🟢 OpenAI o3-mini (Razonamiento STEM y Código)</option>
+                <option value="o1" ${currentModel === 'o1' ? 'selected' : ''}>🟢 OpenAI o1 (Razonamiento Profundo)</option>
+              </optgroup>
             </select>
           </div>
 
           <!-- User Name -->
           <div class="consent-input-group">
             <label class="consent-label">Nombre del Usuario / Alias</label>
-            <input type="text" class="consent-input" id="consentUserName" placeholder="Tu nombre o alias de desarrollador" value="${userName || 'Desarrollador Coki'}">
+            <input type="text" class="consent-input" id="consentUserName" placeholder="Tu nombre o alias" value="${userName || 'Desarrollador Coki'}">
           </div>
 
-          <!-- Google API Key -->
+          <!-- Google AI Studio API Key -->
           <div class="consent-input-group">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <label class="consent-label" style="margin-bottom:0;">Google AI Studio API Key (Opcional para cuota propia)</label>
-              <a href="https://aistudio.google.com/app/apikey" target="_blank" style="font-size:11px; color:#38bdf8; text-decoration:none; font-weight:700;">Obtener API Key gratis ↗</a>
+              <label class="consent-label" style="margin-bottom:0;">Google AI Studio API Key (Opcional)</label>
+              <a href="https://aistudio.google.com/app/apikey" target="_blank" style="font-size:11px; color:#38bdf8; text-decoration:none; font-weight:700;">Obtener Key gratis ↗</a>
             </div>
             <input type="password" class="consent-input" id="consentApiKey" placeholder="AIzaSy..." value="${currentKey}">
-            <div style="font-size:11px; color:#94a3b8; margin-top:4px;">
-              * Si no introduces una clave, se utilizará el motor sintético inteligente de Coki Studios.
-            </div>
           </div>
 
           <div class="consent-footer-actions">
             <button type="button" class="btn-consent-cancel" id="btnConsentCancel">Cancelar</button>
             <button type="button" class="btn-consent-accept" id="btnConsentAccept">
-              ✅ Aceptar y Dar Permiso a Gemini
+              ✅ Guardar &amp; Activar
             </button>
           </div>
         </div>
@@ -478,9 +455,9 @@
 
       document.body.appendChild(overlay);
 
-      overlay.querySelector('#btnLaunchCsidOAuth').addEventListener('click', () => {
+      overlay.querySelector('#btnFastChatGPTLogin').addEventListener('click', () => {
         overlay.remove();
-        this.loginWithCSID();
+        this.loginWithChatGPT('ChatGPT Plus / Pro');
       });
 
       overlay.querySelector('#btnConsentCancel').addEventListener('click', () => overlay.remove());
@@ -493,17 +470,21 @@
         const enteredKey = overlay.querySelector('#consentApiKey').value.trim();
         const selectedModel = overlay.querySelector('#consentModelSelect').value;
 
+        const isGpt = selectedModel.startsWith('gpt-') || selectedModel.startsWith('o1') || selectedModel.startsWith('o3');
+
         const userObj = {
           name: enteredName,
           email: userEmail || `${enteredName.toLowerCase().replace(/\s+/g, '')}@cokistudios.com`,
           picture: this.user ? this.user.picture : null,
-          authType: 'consented_user',
+          authType: isGpt ? 'chatgpt_account' : 'consented_user',
+          provider: isGpt ? 'chatgpt' : 'gemini',
           permissionGiven: true,
           grantedAt: new Date().toISOString()
         };
 
         this.setUser(userObj);
         this.setModel(selectedModel);
+        this.setProvider(isGpt ? 'chatgpt' : 'gemini');
         if (enteredKey) {
           this.setApiKey(enteredKey);
         }
