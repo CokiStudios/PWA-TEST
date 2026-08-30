@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coki Studios — Gemini PWA Suite &amp; Hosted MCP Server</title>
+  <meta name="description" content="Ecosistema unificado de aplicaciones PWA con Gemini AI y Hosted MCP Server de Coki Studios. Code Pro y DayFlow.">
+  <meta name="theme-color" content="#06090f">
+  <link rel="icon" type="image/svg+xml" href="/assets/icon-code.svg">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="/assets/auth.css">
+  <style>
+    :root {
+      --bg-dark: #06090f;
+      --bg-card: rgba(13, 18, 29, 0.75);
+      --bg-card-hover: rgba(22, 30, 48, 0.9);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-glow-code: rgba(99, 102, 241, 0.4);
+      --border-glow-daily: rgba(236, 72, 153, 0.4);
+      --indigo: #6366f1;
+      --pink: #ec4899;
+      --amber: #f59e0b;
+      --emerald: #10b981;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* Ambient Glow Background Orbs */
+    .glow-orb-1 {
+      position: fixed;
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+      top: -150px;
+      left: -100px;
+      pointer-events: none;
+      filter: blur(60px);
+      z-index: 0;
+    }
+
+    .glow-orb-2 {
+      position: fixed;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(236, 72, 153, 0.12) 0%, rgba(245, 158, 11, 0.06) 50%, transparent 70%);
+      top: 30%;
+      right: -120px;
+      pointer-events: none;
+      filter: blur(70px);
+      z-index: 0;
+    }
+
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      height: 72px;
+      background: rgba(6, 9, 15, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+
+    .brand-logo-stack {
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+
+    .brand-icon-1 {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #1e1b4b, #6366f1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 18px;
+    }
+
+    .brand-icon-2 {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #ec4899, #f59e0b);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      margin-left: -12px;
+      margin-top: 10px;
+      font-size: 13px;
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .mcp-live-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 100px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 10px #10b981;
+      animation: pulseAnim 1.5s infinite;
+    }
+
+    @keyframes pulseAnim {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.6; }
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 60px 24px 40px;
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 100px;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      color: #a5b4fc;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 24px;
+    }
+
+    .hero-title {
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: -1px;
+      margin-bottom: 20px;
+    }
+
+    .gradient-text-hero {
+      background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 70%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      max-width: 780px;
+      margin: 0 auto 36px;
+      font-size: clamp(15px, 2vw, 18px);
+      color: var(--text-muted);
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+    }
+
+    /* Two Main Apps Showcase Cards */
+    .apps-grid {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto 60px;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 28px;
+    }
+
+    .app-card {
+      position: relative;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 36px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+    }
+
+    .app-card:hover {
+      transform: translateY(-4px);
+      background: var(--bg-card-hover);
+    }
+
+    .app-card.card-code:hover {
+      border-color: var(--border-glow-code);
+      box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15);
+    }
+
+    .app-card.card-daily:hover {
+      border-color: var(--border-glow-daily);
+      box-shadow: 0 20px 40px rgba(236, 72, 153, 0.15);
+    }
+
+    .app-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .app-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .app-icon-code {
+      background: linear-gradient(135deg, #1e1b4b, #6366f1);
+      color: white;
+    }
+
+    .app-icon-daily {
+      background: linear-gradient(135deg, #f59e0b, #ec4899);
+      color: white;
+    }
+
+    .app-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .app-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .app-title {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .app-description {
+      color: var(--text-muted);
+      font-size: 14.5px;
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      margin-bottom: 24px;
+      flex: 1;
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 30px;
+      font-size: 13.5px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-main);
+    }
+
+    .feature-icon {
+      color: #34d399;
+      font-weight: bold;
+    }
+
+    .btn-launch {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 24px;
+      border-radius: 14px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 15px;
+      transition: all 0.2s;
+    }
+
+    .btn-launch-code {
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: white;
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.35);
+    }
+
+    .btn-launch-code:hover {
+      box-shadow: 0 6px 28px rgba(99, 102, 241, 0.5);
+      transform: scale(1.02);
+    }
+
+    .btn-launch-daily {
+      background: linear-gradient(135deg, #ec4899, #8b5cf6);
+      color: white;
+      box-shadow: 0 4px 20px rgba(236, 72, 153, 0.35);
+    }
+
+    .btn-launch-daily:hover {
+      box-shadow: 0 6px 28px rgba(236, 72, 153, 0.5);
+      transform: scale(1.02);
+    }
+
+    /* Hosted MCP Server Banner & Metrics Section */
+    .mcp-section {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto 60px;
+      padding: 0 24px;
+    }
+
+    .mcp-container {
+      background: rgba(13, 18, 29, 0.85);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 28px;
+      padding: 36px;
+      backdrop-filter: blur(20px);
+    }
+
+    .mcp-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .mcp-title {
+      font-size: 22px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mcp-metrics-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .metric-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .metric-value {
+      font-size: 20px;
+      font-weight: 800;
+      color: #a5b4fc;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+    }
+
+    /* Tools Badges Grid */
+    .tools-badges-title {
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    .tool-badge-card {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+    }
+
+    .tool-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      color: #38bdf8;
+    }
+
+    .tool-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Footer */
+    footer {
+      position: relative;
+      z-index: 1;
+      margin-top: auto;
+      border-top: 1px solid var(--border);
+      padding: 32px 24px;
+      background: rgba(6, 9, 15, 0.95);
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 12px;
+    }
+
+    .footer-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-link:hover {
+      color: var(--text-main);
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-orb-1" aria-hidden="true"></div>
+  <div class="glow-orb-2" aria-hidden="true"></div>
+
+  <!-- Header -->
+  <header>
+    <a href="/" class="brand">
+      <div class="brand-logo-stack">
+        <div class="brand-icon-1">⚡</div>
+        <div class="brand-icon-2">☀️</div>
+      </div>
+      <div>
+        <div class="brand-title">Coki Studios Suite</div>
+        <div class="brand-sub">Gemini PWAs &amp; Hosted MCP Server</div>
+      </div>
+    </a>
+
+    <div class="nav-actions">
+      <div data-coki-auth-mount></div>
+      <div class="mcp-live-pill" id="mcpHeaderStatus">
+        <span class="pulse-dot"></span>
+        <span id="mcpStatusText">MCP Server Online</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-badge">
+      <span>✨</span>
+      <span>Coki Studios Ecosystem 2.0 · Live MCP &amp; Gemini PWAs</span>
+    </div>
+    
+    <h1 class="hero-title">
+      Suite Integral de <span class="gradient-text-hero">Productividad &amp; Código</span>
+    </h1>
+
+    <p class="hero-subtitle">
+      Dos aplicaciones web progresivas de alta gama con soporte offline, reconocimiento y síntesis de voz, renderizado en vivo y servidor oficial <strong>Hosted Model Context Protocol (MCP)</strong> con transporte SSE y JSON-RPC 2.0.
+    </p>
+  </section>
+
+  <!-- Main Apps Showcase -->
+  <main class="apps-grid">
+    
+    <!-- PWA 1: Gemini Code Pro -->
+    <article class="app-card card-code">
+      <div class="app-card-header">
+        <div class="app-icon app-icon-code">⚡</div>
+        <div class="app-tags">
+          <span class="app-tag">PWA</span>
+          <span class="app-tag" style="color:#a5b4fc; border-color:rgba(99,102,241,0.3)">MCP SSE</span>
+          <span class="app-tag">Live Sandbox</span>
+        </div>
+      </div>
+
+      <h2 class="app-title">Gemini Code Pro &amp; MCP Hub</h2>
+      <p class="app-description">
+        Estudio de ingeniería de software para desarrollo Web moderno (React 19, Vite, Tailwind) y Nativo (SwiftUI iOS 17+, Jetpack Compose, Flutter). Incluye Sandbox interactivo y panel ejecutor de herramientas MCP.
+      </p>
+
+      <ul class="feature-list">
+        <li class="feature-item">
+          <span class="feature-icon">✓</span>
+          <span>Arquitectura Fullstack &amp; Generador Nativo (SwiftUI / Compose)</span>
+        </li>
+        <li class="feature-item">
+          <span class="feature-icon">✓</span>
+          <span>Live Web Sandbox con emulador iPad e iPhone</span>
+        </li>
+        <li class="feature-item">
+          <span class="feature-icon">✓</span>
+          <span>Hosted MCP Hub &amp; Inspector de JSON-RPC 2.0 en tiempo real</span>
+        </li>
+      </ul>
+
+      <a href="/pwa-code/" class="btn-launch btn-launch-code">
+        <span>Abrir Gemini Code Pro</span>
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </article>
+
+    <!-- PWA 2: Gemini DayFlow -->
+    <article class="app-card card-daily">
+      <div class="app-card-header">
+        <div class="app-icon app-icon-daily">☀️</div>
+        <div class="app-tags">
+          <span class="app-tag">PWA</span>
+          <span class="app-tag" style="color:#f472b6; border-color:rgba(236,72,153,0.3)">Voice AI</span>
+          <span class="app-tag">Habits 1-3-5</span>
+        </div>
+      </div>
+
+      <h2 class="app-title">Gemini DayFlow Companion</h2>
+      <p class="app-description">
+        Tu asistente y compañero diario inteligente. Dictado de notas por voz en tiempo real, seguimiento de hábitos diarios, matriz de tareas prioritarias (Regla 1-3-5) y síntesis auditiva de respuestas.
+      </p>
+
+      <ul class="feature-list">
+        <li class="feature-item">
+          <span class="feature-icon">✓</span>
+          <span>Dictado por voz en tiempo real con Web Speech API</span>
+        </li>
+        <li class="feature-item">
+          <span class="feature-icon">✓</span>
+          <span>Seguimiento de hábitos diarios (Hidratación, Deep Work, Paseo, Lectura)</span>
+        </li>
+        <li class="feature-item">
+          <span class="feature-icon">✓</span>
+          <span>Síntesis de voz (TTS) para escuchar consejos en voz alta</span>
+        </li>
+      </ul>
+
+      <a href="/pwa-daily/" class="btn-launch btn-launch-daily">
+        <span>Abrir Gemini DayFlow</span>
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </article>
+
+  </main>
+
+  <!-- Hosted MCP Server Status & Tools Directory -->
+  <section class="mcp-section">
+    <div class="mcp-container">
+      <div class="mcp-head">
+        <div>
+          <h2 class="mcp-title">
+            <span>🔌</span>
+            <span>Hosted MCP Server (Model Context Protocol)</span>
+          </h2>
+          <p style="color: var(--text-muted); font-size: 13.5px; margin-top: 4px;">
+            Servidor MCP oficial listo para integración con Cursor, Claude Desktop y Antigravity.
+          </p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <a href="/mcp/sse" target="_blank" class="app-tag" style="color: #38bdf8; text-decoration: none;">GET /mcp/sse</a>
+          <a href="/api/mcp/tools" target="_blank" class="app-tag" style="color: #34d399; text-decoration: none;">GET /api/mcp/tools</a>
+          <a href="/api/mcp/stats" target="_blank" class="app-tag" style="color: #a5b4fc; text-decoration: none;">GET /api/mcp/stats</a>
+        </div>
+      </div>
+
+      <!-- Live Server Metrics -->
+      <div class="mcp-metrics-row">
+        <div class="metric-card">
+          <div style="font-size: 24px;">🛠️</div>
+          <div>
+            <div class="metric-value" id="statsToolsCount">6</div>
+            <div class="metric-label">Herramientas MCP</div>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div style="font-size: 24px;">⚡</div>
+          <div>
+            <div class="metric-value" id="statsTotalCalls">0</div>
+            <div class="metric-label">Tool Calls</div>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div style="font-size: 24px;">🌐</div>
+          <div>
+            <div class="metric-value" id="statsSseSessions">0</div>
+            <div class="metric-label">Sesiones SSE</div>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div style="font-size: 24px;">⏱️</div>
+          <div>
+            <div class="metric-value" id="statsUptime">0m</div>
+            <div class="metric-label">Uptime Activo</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tools Directory Preview -->
+      <div>
+        <div class="tools-badges-title">Herramientas MCP Registradas &amp; Disponibles</div>
+        <div class="tools-grid">
+          <div class="tool-badge-card">
+            <span>📦</span>
+            <div>
+              <div class="tool-name">generate_web_component</div>
+              <div class="tool-desc">Genera componentes React / Tailwind / Vue listos para producción.</div>
+            </div>
+          </div>
+          <div class="tool-badge-card">
+            <span>📱</span>
+            <div>
+              <div class="tool-name">generate_native_screen</div>
+              <div class="tool-desc">Crea pantallas nativas para iOS (SwiftUI), Android (Compose) y Flutter.</div>
+            </div>
+          </div>
+          <div class="tool-badge-card">
+            <span>🔍</span>
+            <div>
+              <div class="tool-name">analyze_codebase_arch</div>
+              <div class="tool-desc">Auditoría de arquitectura limpia, memory leaks y performance.</div>
+            </div>
+          </div>
+          <div class="tool-badge-card">
+            <span>🔄</span>
+            <div>
+              <div class="tool-name">convert_web_to_native</div>
+              <div class="tool-desc">Transpila componentes Web a SwiftUI o Jetpack Compose.</div>
+            </div>
+          </div>
+          <div class="tool-badge-card">
+            <span>✨</span>
+            <div>
+              <div class="tool-name">refactor_code_snippet</div>
+              <div class="tool-desc">Refactorización con tipado estricto e idioms modernos.</div>
+            </div>
+          </div>
+          <div class="tool-badge-card">
+            <span>📚</span>
+            <div>
+              <div class="tool-name">fetch_framework_docs</div>
+              <div class="tool-desc">Guías de referencia rápida y sintaxis de frameworks modernos.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-links">
+      <a href="/pwa-code/" class="footer-link">Gemini Code Pro</a>
+      <span>·</span>
+      <a href="/pwa-daily/" class="footer-link">Gemini DayFlow</a>
+      <span>·</span>
+      <a href="/mcp/sse" class="footer-link">Hosted MCP Server (SSE)</a>
+      <span>·</span>
+      <a href="https://cokistudios.com" target="_blank" class="footer-link">cokistudios.com</a>
+    </div>
+    <div>© 2026 Coki Studios. Todos los derechos reservados. Diseñado para rendimiento y estética de élite.</div>
+  </footer>
+
+  <script>
+    // Live MCP Metrics Fetcher
+    async function updateMcpLiveStats() {
+      try {
+        const res = await fetch('/api/mcp/stats');
+        if (res.ok) {
+          const stats = await res.json();
+          document.getElementById('statsToolsCount').textContent = stats.availableTools || 6;
+          document.getElementById('statsTotalCalls').textContent = stats.totalToolCalls || 0;
+          document.getElementById('statsSseSessions').textContent = stats.activeSseSessions || 0;
+          const mins = Math.floor((stats.uptimeSeconds || 0) / 60);
+          document.getElementById('statsUptime').textContent = `${mins}m ${stats.uptimeSeconds % 60}s`;
+        }
+      } catch (e) {
+        console.warn('MCP stats update:', e);
+      }
+    }
+
+    updateMcpLiveStats();
+    setInterval(updateMcpLiveStats, 8000);
+  <script src="/assets/google-auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Coki Gemini DayFlow — Chat Diario, Hábitos &amp; Voz</title>
+  <meta name="description" content="Tu asistente y compañero diario inteligente con notas de voz, planificación, hábitos y productividad de Coki Studios.">
+  <meta name="theme-color" content="#ec4899">
+  <link rel="manifest" href="/pwa-daily/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/assets/icon-daily.svg">
+  <link rel="apple-touch-icon" href="/assets/icon-daily.svg">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="/assets/auth.css">
+  <link rel="stylesheet" href="/pwa-daily/style.css">
+</head>
+<body>
+  <!-- Ambient Warm Background Orbs -->
+  <div class="glow-blob-1" aria-hidden="true"></div>
+  <div class="glow-blob-2" aria-hidden="true"></div>
+
+  <!-- App Header -->
+  <header>
+    <a href="/" class="brand" title="Ir al Portal de la Suite Coki">
+      <div class="brand-icon">☀️</div>
+      <div>
+        <div class="brand-title">
+          Gemini DayFlow
+          <span style="font-size: 10px; padding: 2px 7px; border-radius: 6px; background: rgba(236, 72, 153, 0.2); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.4); font-weight: 700;">DAILY</span>
+        </div>
+        <div class="brand-sub">Coki Studios · Compañero Diario &amp; Hábitos</div>
+      </div>
+    </a>
+
+    <div class="header-actions">
+      <div data-coki-auth-mount></div>
+      <button class="btn-header btn-install-daily" id="btnInstallDaily" style="display: none;">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        <span>Instalar App</span>
+      </button>
+      <a href="/pwa-code/" class="btn-header" style="text-decoration: none;" title="Abrir Gemini Code Pro">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+        <span>Code Pro</span>
+      </a>
+      <button class="btn-header" id="themeToggle" title="Cambiar tema">☀️</button>
+    </div>
+  </header>
+
+  <!-- App Body Layout: Sidebar + Main Area -->
+  <div class="app-body">
+    
+    <!-- ── LEFT SIDEBAR: DASHBOARD & WIDGETS ── -->
+    <aside class="daily-sidebar">
+      
+      <!-- Morning Briefing Widget -->
+      <div class="briefing-card">
+        <div class="greeting-text" id="greetingText">¡Buenos días! ☀️</div>
+        <div class="date-text" id="currentDateText">Cargando fecha...</div>
+        <div class="quote-box" id="dailyQuote">
+          "El secreto del cambio es enfocar toda tu energía no en luchar contra lo viejo, sino en construir lo nuevo."
+        </div>
+      </div>
+
+      <!-- Habit Tracker Widget -->
+      <div class="widget-card">
+        <div class="widget-title">
+          <span>🎯 Hábitos del Día</span>
+          <span id="habitsProgressText" style="font-size: 11px; color: #34d399; font-weight: 700;">0/6</span>
+        </div>
+        
+        <div class="habits-grid" id="habitsGrid">
+          <button class="habit-btn" data-habit="water">
+            <span class="habit-icon">💧</span>
+            <span>2L Hidratación</span>
+          </button>
+          <button class="habit-btn" data-habit="deepwork">
+            <span class="habit-icon">⚡</span>
+            <span>30m Deep Work</span>
+          </button>
+          <button class="habit-btn" data-habit="walk">
+            <span class="habit-icon">🚶</span>
+            <span>Paseo Activo</span>
+          </button>
+          <button class="habit-btn" data-habit="code">
+            <span class="habit-icon">💻</span>
+            <span>Code Review</span>
+          </button>
+          <button class="habit-btn" data-habit="reading">
+            <span class="habit-icon">📖</span>
+            <span>15m Lectura</span>
+          </button>
+          <button class="habit-btn" data-habit="meditate">
+            <span class="habit-icon">🧘</span>
+            <span>Pausa Consciente</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Priority Tasks (Rule 1-3-5) -->
+      <div class="widget-card">
+        <div class="widget-title">
+          <span>📋 Tareas Prioritarias</span>
+          <span id="tasksCount" style="font-size: 11px; color: var(--text-dim);">0 tareas</span>
+        </div>
+        
+        <form class="task-input-row" id="taskForm">
+          <input 
+            type="text" 
+            class="task-input" 
+            id="taskInput" 
+            placeholder="Nueva tarea clave de hoy..." 
+            autocomplete="off"
+            required
+          >
+          <button type="submit" class="btn-add-task">+</button>
+        </form>
+
+        <div class="tasks-list" id="tasksList">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+
+      <!-- Audio Notes & Saved Voice Memos -->
+      <div class="widget-card">
+        <div class="widget-title">
+          <span>🎙️ Notas de Voz Guardadas</span>
+          <span id="voiceNotesCount" style="font-size: 11px; color: var(--text-dim);">0 notas</span>
+        </div>
+        <div id="voiceNotesList" style="display: flex; flex-direction: column; gap: 8px; max-height: 140px; overflow-y: auto;">
+          <div style="font-size: 12px; color: var(--text-dim); text-align: center; padding: 10px;">
+            Pulsa el micrófono en el chat para grabar notas de voz.
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ── MAIN CHAT & VOICE INTERACTION AREA ── -->
+    <main class="daily-chat-area">
+      
+      <!-- Category Strip Filters -->
+      <div class="categories-strip" role="tablist">
+        <button class="category-chip active" data-category="all">✨ Todo el Día</button>
+        <button class="category-chip" data-category="morning">☕ Rutina Matutina</button>
+        <button class="category-chip" data-category="focus">🎯 Foco &amp; Tareas</button>
+        <button class="category-chip" data-category="wellness">🧘 Bienestar &amp; Hábitos</button>
+        <button class="category-chip" data-category="voice">🎙️ Notas de Voz</button>
+        <button class="category-chip" data-category="night">🌙 Cierre del Día</button>
+      </div>
+
+      <!-- Dynamic Messages Container -->
+      <div class="daily-messages" id="dailyMessages" role="log" aria-live="polite">
+        <!-- Initial messages rendered via app.js -->
+      </div>
+
+      <!-- Input & Audio Controls Container -->
+      <div class="daily-input-container">
+        
+        <!-- Quick Prompts Pills -->
+        <div class="quick-prompts-row" id="quickPromptsRow">
+          <button class="quick-prompt-btn" data-text="☀️ Organiza mi jornada de hoy con la regla 1-3-5">☀️ Planificar mi día</button>
+          <button class="quick-prompt-btn" data-text="🎯 ¿Cómo estructurar un bloque de Deep Work de 90 minutos?">🎯 Bloque Deep Work</button>
+          <button class="quick-prompt-btn" data-text="🧘 Dame un ejercicio rápido de respiración para calmar el estrés">🧘 Pausa de respiración</button>
+          <button class="quick-prompt-btn" data-text="💡 Ayúdame a resumir mis logros de hoy y preparar el día de mañana">🌙 Resumen del día</button>
+          <button class="quick-prompt-btn" data-text="💧 Recomiéndame una rutina de hidratación y pausas activas">💧 Rutina de salud</button>
+        </div>
+
+        <!-- Chat Input Form -->
+        <div class="daily-input-box">
+          <button 
+            type="button" 
+            class="btn-voice-record" 
+            id="btnVoiceRecord" 
+            title="Dictar nota por voz (Web Speech API)"
+            aria-label="Grabar audio con el micrófono"
+          >
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+            </svg>
+          </button>
+
+          <textarea 
+            class="daily-textarea" 
+            id="dailyInput" 
+            placeholder="Escribe un pensamiento, tarea, o usa el micrófono para dictar..." 
+            rows="1"
+          ></textarea>
+
+          <button 
+            type="button" 
+            class="btn-daily-send" 
+            id="btnDailySend" 
+            title="Enviar mensaje a Gemini DayFlow"
+            aria-label="Enviar mensaje"
+          >
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <script src="/assets/google-auth.js"></script>
+  <script src="/pwa-daily/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "Coki Gemini DayFlow — Chat Diario & Productividad",
+  "short_name": "Gemini DayFlow",
+  "description": "Tu asistente y compañero diario inteligente con notas de voz, planificación y hábitos de Coki Studios",
+  "start_url": "/pwa-daily/",
+  "scope": "/pwa-daily/",
+  "display": "standalone",
+  "background_color": "#06090f",
+  "theme_color": "#ec4899",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/assets/icon-daily.svg",
+      "sizes": "192x192 512x512 any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "productivity", "utilities"]
+}
