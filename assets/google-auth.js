@@ -20,12 +20,10 @@
 
   function generateDeviceCode() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let code = '';
-    for (let i = 0; i < 9; i++) {
-      if (i === 4) code += '-';
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return code; // Exactly 9 alphanumeric characters (e.g. ABCD-EFGHI)
+    const p1 = Array.from({length: 3}, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
+    const p2 = Array.from({length: 3}, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
+    const p3 = Array.from({length: 3}, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
+    return `${p1}-${p2}-${p3}`; // Exactly 9 alphanumeric chars: XXX-XXX-XXX
   }
 
   class CokiAuthManager {

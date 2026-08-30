@@ -1,5 +1,5 @@
 // Coki Gemini DayFlow Service Worker (Network-First Strategy)
-const CACHE_NAME = 'coki-daily-flow-v5-universal';
+const CACHE_NAME = 'coki-daily-flow-v6-9chars';
 const STATIC_ASSETS = [
   './',
   'index.html',

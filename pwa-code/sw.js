@@ -1,5 +1,5 @@
 // Coki Gemini Code Pro Service Worker (Network-First Strategy)
-const CACHE_NAME = 'coki-code-mcp-v5-universal';
+const CACHE_NAME = 'coki-code-mcp-v6-9chars';
 const STATIC_ASSETS = [
   './',
   'index.html',
