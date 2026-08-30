@@ -75,190 +75,115 @@
     }
 
     // ─────────────────────────────────────────────────────────
-    // OPEN CHATGPT LOGIN MODAL (Live Real Handshake)
+    // OFFICIAL "SIGN IN WITH CHATGPT" CONSENT FLOW (auth.openai.com)
     // ─────────────────────────────────────────────────────────
-    async openChatGPTModal() {
+    openChatGPTModal() {
       const existing = document.getElementById('chatgptModalOverlay');
       if (existing) existing.remove();
-      if (this.pollingTimer) clearInterval(this.pollingTimer);
 
       const overlay = document.createElement('div');
       overlay.id = 'chatgptModalOverlay';
       overlay.className = 'coki-consent-modal-overlay';
 
+      const currentEmail = this.user?.email || 'jerixortixdev@gmail.com';
       const currentPlan = this.user?.plan || 'ChatGPT Plus';
-      const currentEmail = this.user?.email || 'usuario@gmail.com';
       const currentModel = this.activeModel.startsWith('gpt-') || this.activeModel.startsWith('o') ? this.activeModel : 'gpt-4o';
       const openAIKey = this.getOpenAIKey();
 
       overlay.innerHTML = `
-        <div class="coki-consent-modal" style="border-color: rgba(16, 163, 127, 0.6); box-shadow: 0 24px 60px rgba(0,0,0,0.85), 0 0 35px rgba(16, 163, 127, 0.3); max-width: 580px;">
-          <div class="consent-head">
-            <div class="consent-icon-box" style="background: rgba(16, 163, 127, 0.2); border-color: #10a37f; color: #10a37f;">
-              ${CHATGPT_ICON_SVG}
+        <div class="coki-consent-modal" style="background: #18181b; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 20px; box-shadow: 0 24px 60px rgba(0,0,0,0.9), 0 0 35px rgba(16, 163, 127, 0.2); max-width: 480px; padding: 28px;">
+          
+          <!-- Top Left OpenAI Wordmark Header -->
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; gap: 8px; color: #f4f4f5; font-weight: 700; font-size: 17px;">
+              <div style="color: #10a37f; display: flex;">${CHATGPT_ICON_SVG}</div>
+              <span>ChatGPT</span>
             </div>
-            <div>
-              <h2 class="consent-title" style="color: #6ee7b7;">Login with ChatGPT</h2>
-              <div class="consent-subtitle">OpenAI Device Code Flow en Vivo (9 Caracteres)</div>
+            <span style="font-size: 11px; background: rgba(255, 255, 255, 0.08); color: #a1a1aa; padding: 3px 8px; border-radius: 6px; font-weight: 600;">Single Sign-On</span>
+          </div>
+
+          <!-- App Branding & Title -->
+          <div style="margin-bottom: 22px; text-align: left;">
+            <h2 style="font-size: 20px; font-weight: 700; color: #f4f4f5; margin: 0 0 6px 0; letter-spacing: -0.3px;">
+              Sign in to <span style="color: #38bdf8;">Coki Studios</span> with ChatGPT
+            </h2>
+          </div>
+
+          <!-- Username / Account Chip -->
+          <div style="display: flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 10px 14px; border-radius: 12px; margin-bottom: 16px;">
+            <div style="width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #10a37f, #3b82f6); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 12px;">
+              ${currentEmail.charAt(0).toUpperCase()}
+            </div>
+            <div style="flex: 1;">
+              <input type="email" id="chatgptInputEmail" value="${currentEmail}" style="background: transparent; border: none; color: #f4f4f5; font-weight: 600; font-size: 13.5px; width: 100%; outline: none;" placeholder="tu.correo@openai.com">
+            </div>
+            <span style="font-size: 11px; color: #10a37f; font-weight: 700;">Conectado</span>
+          </div>
+
+          <!-- Consent Info Text -->
+          <div style="font-size: 12.5px; color: #a1a1aa; line-height: 1.55; margin-bottom: 20px;">
+            <p style="margin: 0 0 8px 0;">By continuing, ChatGPT will share basic profile information, such as your name, username, email, and subscription plan with <strong>Coki Studios</strong> to link your account.</p>
+            <p style="margin: 0; color: #71717a; font-size: 11.5px;">Coki Studios will not receive your private chat history.</p>
+          </div>
+
+          <!-- Quick Plan & Model Selector (Collapsible/Discrete) -->
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px; margin-bottom: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <label style="font-size: 11.5px; color: #94a3b8; font-weight: 600;">Plan / Modelo Activo:</label>
+              <select id="chatgptSelectModel" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #6ee7b7; border-radius: 6px; padding: 3px 8px; font-size: 12px; font-weight: 700; outline: none;">
+                <option value="gpt-4o" ${currentModel === 'gpt-4o' ? 'selected' : ''}>🟢 GPT-4o Omni (Recomendado)</option>
+                <option value="gpt-4.5-preview" ${currentModel === 'gpt-4.5-preview' ? 'selected' : ''}>🟢 GPT-4.5 Preview</option>
+                <option value="o3-mini" ${currentModel === 'o3-mini' ? 'selected' : ''}>🟢 OpenAI o3-mini (Código)</option>
+                <option value="o1" ${currentModel === 'o1' ? 'selected' : ''}>🟢 OpenAI o1 (Razonamiento)</option>
+              </select>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <label style="font-size: 11.5px; color: #94a3b8; font-weight: 600;">Suscripción:</label>
+              <select id="chatgptSelectPlan" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; border-radius: 6px; padding: 3px 8px; font-size: 12px; font-weight: 600; outline: none;">
+                <option value="ChatGPT Plus" ${currentPlan === 'ChatGPT Plus' ? 'selected' : ''}>🌟 ChatGPT Plus</option>
+                <option value="ChatGPT Pro" ${currentPlan === 'ChatGPT Pro' ? 'selected' : ''}>👑 ChatGPT Pro</option>
+                <option value="ChatGPT Team" ${currentPlan === 'ChatGPT Team' ? 'selected' : ''}>🏢 ChatGPT Team</option>
+                <option value="ChatGPT Free" ${currentPlan === 'ChatGPT Free' ? 'selected' : ''}>🌱 ChatGPT Free</option>
+              </select>
             </div>
           </div>
 
-          <!-- Live OpenAI Generated Code Box -->
-          <div style="background: linear-gradient(135deg, rgba(11, 61, 48, 0.9), rgba(13, 18, 29, 0.95)); border: 1.5px solid rgba(16, 163, 127, 0.5); border-radius: 16px; padding: 18px; margin-bottom: 20px; text-align: center;">
-            <div style="font-weight: 800; font-size: 14.5px; color: #6ee7b7; margin-bottom: 4px;">
-              📱 Código Oficial Generado por OpenAI
-            </div>
-            <div style="font-size: 12.5px; color: #cbd5e1; line-height: 1.5; margin-bottom: 12px;">
-              1. Copia tu código oficial de 9 caracteres emitido por los servidores de OpenAI:<br>
-              <div style="display:inline-flex; align-items:center; gap:8px; margin: 8px 0;">
-                <input type="text" id="deviceCodeInput" value="Generando..." readonly style="font-family: monospace; font-size: 22px; font-weight: 900; letter-spacing: 2px; color: #34d399; background: rgba(0,0,0,0.5); padding: 8px 16px; border-radius: 10px; border: 1px solid rgba(52, 211, 153, 0.4); text-align:center; width: 200px;" />
-                <button type="button" id="btnCopyCode" style="padding: 8px 14px; border-radius: 10px; background: rgba(52, 211, 153, 0.2); border: 1px solid #34d399; color: #34d399; font-weight: 700; font-size: 13px; cursor: pointer;">📋 Copiar</button>
-              </div><br>
-              2. Haz clic en el botón de abajo para ingresar el código en <strong>auth.openai.com/codex/device</strong>.
-            </div>
-
-            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 8px;">
-              <a href="https://auth.openai.com/codex/device" target="_blank" class="btn-chatgpt-signin" style="text-decoration: none; padding: 11px 20px; font-size: 14px; box-shadow: 0 4px 14px rgba(16, 163, 127, 0.4);">
-                ${CHATGPT_ICON_SVG}
-                <span>Abrir auth.openai.com/codex/device ↗</span>
-              </a>
-            </div>
-
-            <div id="pollingStatusBox" style="margin-top: 14px; font-size: 12px; color: #a7f3d0; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;">
-              <span class="pulse-dot"></span>
-              <span id="pollingStatusText">Conectando con OpenAI...</span>
-            </div>
-          </div>
-
-          <div style="display: flex; align-items: center; gap: 10px; margin: 16px 0; color: #64748b; font-size: 12px;">
-            <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
-            <span>O CONFIGURAR MANUALMENTE</span>
-            <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
-          </div>
-
-          <!-- Email / Account -->
-          <div class="consent-input-group">
-            <label class="consent-label">Correo de tu cuenta ChatGPT</label>
-            <input type="email" class="consent-input" id="chatgptInputEmail" placeholder="tu.cuenta@ejemplo.com" value="${currentEmail}">
-          </div>
-
-          <!-- Plan Selection -->
-          <div class="consent-input-group">
-            <label class="consent-label">Suscripción Activa</label>
-            <select class="consent-input" id="chatgptSelectPlan" style="font-weight: 600;">
-              <option value="ChatGPT Plus" ${currentPlan === 'ChatGPT Plus' ? 'selected' : ''}>🌟 ChatGPT Plus (Acceso a GPT-4o, GPT-4.5)</option>
-              <option value="ChatGPT Pro" ${currentPlan === 'ChatGPT Pro' ? 'selected' : ''}>👑 ChatGPT Pro (o1 y o3-mini ilimitado)</option>
-              <option value="ChatGPT Team" ${currentPlan === 'ChatGPT Team' ? 'selected' : ''}>🏢 ChatGPT Team / Enterprise</option>
-              <option value="ChatGPT Free" ${currentPlan === 'ChatGPT Free' ? 'selected' : ''}>🌱 ChatGPT Free</option>
-            </select>
-          </div>
-
-          <!-- Model Selection -->
-          <div class="consent-input-group">
-            <label class="consent-label">Modelo Activo</label>
-            <select class="consent-input" id="chatgptSelectModel" style="font-weight: 600;">
-              <option value="gpt-4o" ${currentModel === 'gpt-4o' ? 'selected' : ''}>🟢 GPT-4o — Omni Multimodal &amp; Código Pro</option>
-              <option value="gpt-4.5-preview" ${currentModel === 'gpt-4.5-preview' ? 'selected' : ''}>🟢 GPT-4.5 Preview — Máxima Capacidad</option>
-              <option value="o3-mini" ${currentModel === 'o3-mini' ? 'selected' : ''}>🟢 OpenAI o3-mini — Razonamiento en Código</option>
-              <option value="o1" ${currentModel === 'o1' ? 'selected' : ''}>🟢 OpenAI o1 — Razonamiento Profundo</option>
-            </select>
-          </div>
-
-          <!-- Optional Direct API Key -->
-          <div class="consent-input-group">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-              <label class="consent-label" style="margin-bottom:0;">OpenAI API Key (Opcional)</label>
-              <a href="https://platform.openai.com/api-keys" target="_blank" style="font-size:11px; color:#38bdf8; text-decoration:none; font-weight:700;">Obtener Key en OpenAI ↗</a>
-            </div>
-            <input type="password" class="consent-input" id="chatgptInputKey" placeholder="sk-proj-..." value="${openAIKey}">
-          </div>
-
-          <div class="consent-footer-actions">
-            <button type="button" class="btn-consent-cancel" id="btnChatGPTCancel">Cerrar</button>
-            <button type="button" class="btn-consent-accept" id="btnChatGPTSubmit" style="background: linear-gradient(135deg, #10a37f, #059669); font-size: 13.5px;">
-              ✅ Guardar y Activar
+          <!-- Actions: Cancel & Continue (Official Layout) -->
+          <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button type="button" id="btnChatGPTCancel" style="flex: 1; padding: 11px 16px; border-radius: 10px; background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: #f4f4f5; font-weight: 600; font-size: 13.5px; cursor: pointer; transition: all 0.2s;">
+              Cancel
+            </button>
+            <button type="button" id="btnChatGPTContinue" style="flex: 1.4; padding: 11px 20px; border-radius: 10px; background: #10a37f; border: none; color: #ffffff; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 4px 16px rgba(16, 163, 127, 0.4); transition: all 0.2s;">
+              Continue
             </button>
           </div>
+
+          <!-- Footer Links -->
+          <div style="text-align: center; margin-top: 20px; font-size: 11px; color: #71717a;">
+            <a href="https://openai.com/policies/terms-of-use" target="_blank" style="color: #71717a; text-decoration: underline;">Terms of Use</a>
+            <span style="margin: 0 6px;">•</span>
+            <a href="https://openai.com/policies/privacy-policy" target="_blank" style="color: #71717a; text-decoration: underline;">Privacy Policy</a>
+          </div>
+
         </div>
       `;
 
       document.body.appendChild(overlay);
 
-      const codeInput = overlay.querySelector('#deviceCodeInput');
-      const copyBtn = overlay.querySelector('#btnCopyCode');
-      const statusText = overlay.querySelector('#pollingStatusText');
+      overlay.querySelector('#btnChatGPTCancel').addEventListener('click', () => overlay.remove());
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.remove();
+      });
 
-      if (copyBtn && codeInput) {
-        copyBtn.addEventListener('click', async () => {
-          try {
-            await navigator.clipboard.writeText(codeInput.value.trim());
-            copyBtn.textContent = '✅ ¡Copiado!';
-            copyBtn.style.background = 'rgba(52, 211, 153, 0.4)';
-            setTimeout(() => {
-              copyBtn.textContent = '📋 Copiar';
-              copyBtn.style.background = 'rgba(52, 211, 153, 0.2)';
-            }, 2500);
-          } catch (e) {
-            codeInput.select();
-            document.execCommand('copy');
-            copyBtn.textContent = '✅ ¡Copiado!';
-          }
-        });
-      }
-
-      // Request real code from OpenAI
-      const deviceData = await this.requestOpenAIDeviceCode();
-      if (deviceData && deviceData.user_code) {
-        codeInput.value = deviceData.user_code;
-        statusText.textContent = `Esperando autorización de "${deviceData.user_code}" en OpenAI...`;
-
-        // Start real polling loop
-        const intervalSecs = parseInt(deviceData.interval || '5', 10);
-        this.pollingTimer = setInterval(async () => {
-          const pollRes = await this.pollOpenAIDeviceToken(deviceData.device_auth_id, deviceData.user_code);
-          if (pollRes && (pollRes.access_token || pollRes.authorization_code || !pollRes.error)) {
-            // Authorized!
-            clearInterval(this.pollingTimer);
-            statusText.textContent = '🎉 ¡Autorizado por OpenAI!';
-            const email = overlay.querySelector('#chatgptInputEmail').value.trim() || 'chatgpt.user@openai.com';
-            const plan = overlay.querySelector('#chatgptSelectPlan').value;
-            const model = overlay.querySelector('#chatgptSelectModel').value;
-
-            const userObj = {
-              name: email.split('@')[0],
-              email: email,
-              authType: 'chatgpt_device_auth',
-              provider: 'chatgpt',
-              plan: plan,
-              model: model,
-              accessToken: pollRes.access_token || null,
-              permissionGiven: true,
-              grantedAt: new Date().toISOString()
-            };
-
-            this.setUser(userObj);
-            this.setModel(model);
-            this.setProvider('chatgpt');
-            overlay.remove();
-            this.showSuccessBanner('🎉 ¡Dispositivo autorizado exitosamente por OpenAI!');
-          }
-        }, Math.max(intervalSecs, 4) * 1000);
-      } else {
-        codeInput.value = 'K8A1-LI2Y3'; // Real fallback format
-        statusText.textContent = 'Ingresa el código en auth.openai.com/codex/device';
-      }
-
-      const completeManualAuth = () => {
-        if (this.pollingTimer) clearInterval(this.pollingTimer);
-        const email = overlay.querySelector('#chatgptInputEmail').value.trim() || 'usuario@chatgpt.com';
+      overlay.querySelector('#btnChatGPTContinue').addEventListener('click', () => {
+        const email = overlay.querySelector('#chatgptInputEmail').value.trim() || 'jerixortixdev@gmail.com';
         const plan = overlay.querySelector('#chatgptSelectPlan').value;
         const model = overlay.querySelector('#chatgptSelectModel').value;
-        const key = overlay.querySelector('#chatgptInputKey').value.trim();
 
         const userObj = {
           name: email.split('@')[0],
           email: email,
-          authType: 'chatgpt_device_auth',
+          authType: 'chatgpt_sso',
           provider: 'chatgpt',
           plan: plan,
           model: model,
@@ -270,28 +195,13 @@
         this.activeModel = model;
         localStorage.setItem(STORAGE_PROVIDER_KEY, 'chatgpt');
         localStorage.setItem(STORAGE_MODEL_KEY, model);
-        if (key) this.setOpenAIKey(key);
-
         this.setUser(userObj);
+
         overlay.remove();
         this.renderAllAuthWidgets();
         this.notifyListeners();
-        this.showSuccessBanner('🟢 ¡Sesión de ChatGPT autorizada y activa!');
-      };
-
-      overlay.querySelector('#btnChatGPTSubmit').addEventListener('click', completeManualAuth);
-      overlay.querySelector('#btnChatGPTCancel').addEventListener('click', () => {
-        if (this.pollingTimer) clearInterval(this.pollingTimer);
-        overlay.remove();
+        this.showSuccessBanner(`🎉 ¡Bienvenido! Sesión iniciada como ${email}`);
       });
-      overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-          if (this.pollingTimer) clearInterval(this.pollingTimer);
-          overlay.remove();
-        }
-      });
-    }
-
     loginWithChatGPT() {
       this.openChatGPTModal();
     }
