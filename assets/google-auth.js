@@ -562,14 +562,16 @@
         wrapper.appendChild(pill);
         wrapper.appendChild(dropdown);
       } else {
-        // Dual Buttons: Login with ChatGPT & Google Sign-In
+        // Dual Buttons: Continue with ChatGPT & Google Sign-In
         const btnChatGPT = document.createElement('button');
         btnChatGPT.type = 'button';
-        btnChatGPT.className = 'btn-chatgpt-signin';
-        btnChatGPT.title = 'Iniciar sesión con tu cuenta de ChatGPT (Device Flow / Plus / Pro)';
+        btnChatGPT.className = 'btn-continue-with-chatgpt';
+        btnChatGPT.title = 'Continuar con tu cuenta de ChatGPT (OpenAI Device Flow)';
         btnChatGPT.innerHTML = `
-          ${CHATGPT_ICON_SVG}
-          <span>Login with ChatGPT</span>
+          <div style="display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; flex-shrink:0; color:#10a37f;">
+            ${CHATGPT_ICON_SVG}
+          </div>
+          <span>Continue with ChatGPT</span>
         `;
         btnChatGPT.addEventListener('click', () => this.openChatGPTModal());
 

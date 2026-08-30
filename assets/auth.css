@@ -7,7 +7,41 @@
   font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Official Login with ChatGPT Button (inspired by @opencoredev/login-with-chatgpt) */
+/* Official Continue with ChatGPT Button (Supabase / Dashboard Style) */
+.btn-continue-with-chatgpt {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-out;
+  backdrop-filter: blur(12px);
+  text-decoration: none;
+}
+
+.btn-continue-with-chatgpt:hover {
+  background: rgba(16, 163, 127, 0.18);
+  border-color: rgba(16, 163, 127, 0.75);
+  box-shadow: 0 4px 20px rgba(16, 163, 127, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-continue-with-chatgpt svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
 .btn-chatgpt-signin {
   display: inline-flex;
   align-items: center;
