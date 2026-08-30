@@ -131,19 +131,21 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
               <label style="font-size: 11.5px; color: #94a3b8; font-weight: 600;">Plan / Modelo Activo:</label>
               <select id="chatgptSelectModel" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #6ee7b7; border-radius: 6px; padding: 3px 8px; font-size: 12px; font-weight: 700; outline: none;">
-                <option value="gpt-4o" ${currentModel === 'gpt-4o' ? 'selected' : ''}>🟢 GPT-4o Omni (Recomendado)</option>
-                <option value="gpt-4.5-preview" ${currentModel === 'gpt-4.5-preview' ? 'selected' : ''}>🟢 GPT-4.5 Preview</option>
-                <option value="o3-mini" ${currentModel === 'o3-mini' ? 'selected' : ''}>🟢 OpenAI o3-mini (Código)</option>
-                <option value="o1" ${currentModel === 'o1' ? 'selected' : ''}>🟢 OpenAI o1 (Razonamiento)</option>
+                <option value="gpt-5.6-sol" ${currentModel === 'gpt-5.6-sol' ? 'selected' : ''}>GPT-5.6 Sol (Flagship High Reasoning)</option>
+                <option value="gpt-5.6-terra" ${currentModel === 'gpt-5.6-terra' ? 'selected' : ''}>GPT-5.6 Terra (Balanced Intelligence)</option>
+                <option value="gpt-5.6-luna" ${currentModel === 'gpt-5.6-luna' ? 'selected' : ''}>GPT-5.6 Luna (Fast Efficient)</option>
+                <option value="gpt-4o" ${currentModel === 'gpt-4o' ? 'selected' : ''}>GPT-4o (Omni Multimodal)</option>
+                <option value="o3-mini" ${currentModel === 'o3-mini' ? 'selected' : ''}>OpenAI o3-mini (Code Reasoning)</option>
+                <option value="o1" ${currentModel === 'o1' ? 'selected' : ''}>OpenAI o1 (Deep Reasoning)</option>
               </select>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <label style="font-size: 11.5px; color: #94a3b8; font-weight: 600;">Suscripción:</label>
               <select id="chatgptSelectPlan" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; border-radius: 6px; padding: 3px 8px; font-size: 12px; font-weight: 600; outline: none;">
-                <option value="ChatGPT Plus" ${currentPlan === 'ChatGPT Plus' ? 'selected' : ''}>🌟 ChatGPT Plus</option>
-                <option value="ChatGPT Pro" ${currentPlan === 'ChatGPT Pro' ? 'selected' : ''}>👑 ChatGPT Pro</option>
-                <option value="ChatGPT Team" ${currentPlan === 'ChatGPT Team' ? 'selected' : ''}>🏢 ChatGPT Team</option>
-                <option value="ChatGPT Free" ${currentPlan === 'ChatGPT Free' ? 'selected' : ''}>🌱 ChatGPT Free</option>
+                <option value="ChatGPT Plus" ${currentPlan === 'ChatGPT Plus' ? 'selected' : ''}>ChatGPT Plus</option>
+                <option value="ChatGPT Pro" ${currentPlan === 'ChatGPT Pro' ? 'selected' : ''}>ChatGPT Pro</option>
+                <option value="ChatGPT Team" ${currentPlan === 'ChatGPT Team' ? 'selected' : ''}>ChatGPT Team</option>
+                <option value="ChatGPT Free" ${currentPlan === 'ChatGPT Free' ? 'selected' : ''}>ChatGPT Free</option>
               </select>
             </div>
           </div>
@@ -409,7 +411,7 @@
           avatarHtml = `<div class="user-avatar-fallback google-avatar">${this.user.name.charAt(0)}</div>`;
         }
 
-        const badgeLabel = isChatGPT ? `🟢 ChatGPT (${this.getModel()})` : `⚡ Gemini (${this.getModel()})`;
+        const badgeLabel = isChatGPT ? `ChatGPT [${this.getModel()}]` : `Gemini [${this.getModel()}]`;
 
         pill.innerHTML = `
           ${avatarHtml}
@@ -427,20 +429,17 @@
           <div class="dropdown-user-header">
             <div style="font-weight:700; font-size:13px; color:#f8fafc;">${this.user.name}</div>
             <div class="dropdown-user-email">${this.user.email || 'Identidad autorizada'}</div>
-            ${isChatGPT ? `<div class="dropdown-plan-badge">Plan: ${this.user.plan || 'ChatGPT Plus / Pro'}</div>` : ''}
+            ${isChatGPT ? `<div class="dropdown-plan-badge">Plan: ${this.user.plan || 'ChatGPT Plus'}</div>` : ''}
             <div style="font-size:10px; color:#38bdf8; margin-top:4px; font-weight:700;">Modelo Activo: ${this.getModel()}</div>
           </div>
           <button class="dropdown-action-btn btn-open-chatgpt-config">
-            <span>🟢</span>
             <span>Ajustes de ChatGPT (${this.user.plan || 'Plus'})</span>
           </button>
           <button class="dropdown-action-btn btn-open-gemini-config">
-            <span>⚡</span>
-            <span>Cambiar a Google Gemini 3.7</span>
+            <span>Cambiar a Google Gemini</span>
           </button>
           <button class="dropdown-action-btn logout btn-logout-action">
-            <span>🚪</span>
-            <span>Cerrar sesión / Desconectar</span>
+            <span>Cerrar sesion</span>
           </button>
         `;
 
