@@ -21,11 +21,11 @@
   function generateDeviceCode() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let code = '';
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 9; i++) {
       if (i === 4) code += '-';
       code += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    return code;
+    return code; // Exactly 9 alphanumeric characters (e.g. ABCD-EFGHI)
   }
 
   class CokiAuthManager {
@@ -74,21 +74,22 @@
             </div>
             <div>
               <h2 class="consent-title" style="color: #6ee7b7;">Login with ChatGPT</h2>
-              <div class="consent-subtitle">OpenAI Device Code Flow &amp; Conexión de Cuenta</div>
+              <div class="consent-subtitle">OpenAI Device Code Flow (Código de 9 Caracteres)</div>
             </div>
           </div>
 
-          <!-- Official OpenAI Device Code Flow Box -->
+          <!-- Official OpenAI Device Code Flow Box (9 chars) -->
           <div style="background: linear-gradient(135deg, rgba(11, 61, 48, 0.9), rgba(13, 18, 29, 0.95)); border: 1.5px solid rgba(16, 163, 127, 0.5); border-radius: 16px; padding: 18px; margin-bottom: 20px; text-align: center;">
             <div style="font-weight: 800; font-size: 14.5px; color: #6ee7b7; margin-bottom: 4px;">
-              📱 Flujo de Autorización de Dispositivo OpenAI
+              📱 Código de Dispositivo OpenAI (9 caracteres)
             </div>
             <div style="font-size: 12.5px; color: #cbd5e1; line-height: 1.5; margin-bottom: 12px;">
-              1. Copia tu código de vinculación:<br>
-              <div style="font-family: monospace; font-size: 20px; font-weight: 900; letter-spacing: 2px; color: #34d399; background: rgba(0,0,0,0.5); padding: 8px 16px; border-radius: 10px; display: inline-block; margin: 8px 0; border: 1px solid rgba(52, 211, 153, 0.4);">
-                ${deviceCode}
+              1. Copia tu código oficial de 9 caracteres:<br>
+              <div style="display:inline-flex; align-items:center; gap:8px; margin: 8px 0;">
+                <input type="text" id="deviceCodeInput" value="${deviceCode}" style="font-family: monospace; font-size: 20px; font-weight: 900; letter-spacing: 2px; color: #34d399; background: rgba(0,0,0,0.5); padding: 8px 16px; border-radius: 10px; border: 1px solid rgba(52, 211, 153, 0.4); text-align:center; width: 190px;" />
+                <button type="button" id="btnCopyCode" style="padding: 8px 12px; border-radius: 10px; background: rgba(52, 211, 153, 0.2); border: 1px solid #34d399; color: #34d399; font-weight: 700; font-size: 12px; cursor: pointer;">📋 Copiar</button>
               </div><br>
-              2. Abre la página oficial de autorización de OpenAI y autoriza tu sesión.
+              2. Pégalo en la página de autorización de OpenAI y autoriza tu sesión.
             </div>
 
             <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
@@ -183,6 +184,26 @@
         this.notifyListeners();
         this.showSuccessBanner('🟢 ¡Sesión de ChatGPT autorizada y activa!');
       };
+
+      const copyBtn = overlay.querySelector('#btnCopyCode');
+      const codeInput = overlay.querySelector('#deviceCodeInput');
+      if (copyBtn && codeInput) {
+        copyBtn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(codeInput.value.trim());
+            copyBtn.textContent = '✅ ¡Copiado!';
+            copyBtn.style.background = 'rgba(52, 211, 153, 0.4)';
+            setTimeout(() => {
+              copyBtn.textContent = '📋 Copiar';
+              copyBtn.style.background = 'rgba(52, 211, 153, 0.2)';
+            }, 2500);
+          } catch (e) {
+            codeInput.select();
+            document.execCommand('copy');
+            copyBtn.textContent = '✅ ¡Copiado!';
+          }
+        });
+      }
 
       overlay.querySelector('#btnConfirmDeviceAuth').addEventListener('click', () => {
         const email = overlay.querySelector('#chatgptInputEmail').value.trim() || 'usuario@chatgpt.com';
