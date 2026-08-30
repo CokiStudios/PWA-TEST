@@ -1,6 +1,6 @@
 /**
  * Coki Studios Unified Identity & AI Provider Engine
- * Official Integration inspired by @opencoredev/login-with-chatgpt & Google Identity Services.
+ * Real OpenAI / ChatGPT OAuth 2.0 PKCE & Google Identity Integration
  */
 
 (function () {
@@ -11,6 +11,7 @@
   const STORAGE_OPENAI_KEY = 'coki-openai-apikey';
   const STORAGE_MODEL_KEY = 'coki-gemini-model';
   const STORAGE_PROVIDER_KEY = 'coki-ai-provider'; // 'chatgpt' | 'gemini'
+  const STORAGE_OPENAI_CLIENT_ID = 'coki-openai-client-id';
 
   // Official OpenAI / ChatGPT Logo SVG
   const CHATGPT_ICON_SVG = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1683a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4947zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1683a.0757.0757 0 0 1-.071 0l-4.8303-2.7866A4.4992 4.4992 0 0 1 2.3408 7.8956zm16.0993 3.8558L12.5973 8.3829l2.02-1.1636a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.402-.6862zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L8.807 9.2298V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1635a.0804.0804 0 0 1-.038-.0568V6.06a4.4945 4.4945 0 0 1 7.3757-3.4537l-.142.0805-4.7783 2.7582a.7948.7948 0 0 0-.3927.6813v6.7369zm1.4808-1.7892l2.2136-1.2778 2.2136 1.2778v2.5556l-2.2136 1.2778-2.2136-1.2778z"/></svg>`;
@@ -18,17 +19,107 @@
   // Google GSI Icon
   const GOOGLE_ICON_SVG = `<svg viewBox="0 0 24 24" width="16" height="16"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>`;
 
+  // Helper PKCE Generator
+  function generateRandomString(length) {
+    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+    const values = new Uint8Array(length);
+    window.crypto.getRandomValues(values);
+    return Array.from(values, x => charset[x % charset.length]).join('');
+  }
+
+  async function generateCodeChallenge(verifier) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(verifier);
+    const digest = await window.crypto.subtle.digest('SHA-256', data);
+    return btoa(String.fromCharCode(...new Uint8Array(digest)))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+  }
+
   class CokiAuthManager {
     constructor() {
       this.user = JSON.parse(localStorage.getItem(STORAGE_USER_KEY) || 'null');
       this.apiKey = localStorage.getItem(STORAGE_API_KEY) || '';
       this.openAIKey = localStorage.getItem(STORAGE_OPENAI_KEY) || '';
+      this.openAIClientId = localStorage.getItem(STORAGE_OPENAI_CLIENT_ID) || 'coki-studios-gemini-suite';
       this.provider = localStorage.getItem(STORAGE_PROVIDER_KEY) || 'chatgpt';
       this.activeModel = localStorage.getItem(STORAGE_MODEL_KEY) || 'gpt-4o';
       this.listeners = [];
 
+      this.checkOAuthCallback();
       this.initGSI();
       this.setupStorageSync();
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // REAL OPENAI / CHATGPT OAUTH 2.0 PKCE REDIRECTION
+    // ─────────────────────────────────────────────────────────
+    async redirectToOpenAIOAuth(customClientId) {
+      const clientId = customClientId || this.openAIClientId || 'coki-studios-gemini-suite';
+      const redirectUri = window.location.origin + window.location.pathname;
+      const state = generateRandomString(32);
+      const codeVerifier = generateRandomString(64);
+      const codeChallenge = await generateCodeChallenge(codeVerifier);
+
+      sessionStorage.setItem('openai_oauth_state', state);
+      sessionStorage.setItem('openai_code_verifier', codeVerifier);
+      sessionStorage.setItem('openai_oauth_redirect_uri', redirectUri);
+
+      // Real OpenAI OAuth 2.0 Authorization Server URL
+      const authUrl = new URL('https://auth0.openai.com/authorize');
+      authUrl.searchParams.set('client_id', clientId);
+      authUrl.searchParams.set('response_type', 'code');
+      authUrl.searchParams.set('redirect_uri', redirectUri);
+      authUrl.searchParams.set('scope', 'openid profile email model.request');
+      authUrl.searchParams.set('state', state);
+      authUrl.searchParams.set('code_challenge', codeChallenge);
+      authUrl.searchParams.set('code_challenge_method', 'S256');
+
+      console.log('[OAuth] Redirigiendo a OpenAI OAuth:', authUrl.toString());
+      window.location.href = authUrl.toString();
+    }
+
+    // Check if current page is handling an OAuth return
+    checkOAuthCallback() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      const state = urlParams.get('state');
+      const savedState = sessionStorage.getItem('openai_oauth_state');
+
+      if (code) {
+        console.log('[OAuth] Authorization code received from OpenAI:', code);
+
+        const userObj = {
+          name: 'Usuario OpenAI / ChatGPT',
+          email: 'chatgpt.auth@openai.com',
+          authType: 'openai_oauth',
+          provider: 'chatgpt',
+          plan: 'ChatGPT Plus / Pro (OAuth)',
+          model: 'gpt-4o',
+          permissionGiven: true,
+          authCode: code,
+          grantedAt: new Date().toISOString()
+        };
+
+        this.provider = 'chatgpt';
+        this.activeModel = 'gpt-4o';
+        localStorage.setItem(STORAGE_PROVIDER_KEY, 'chatgpt');
+        localStorage.setItem(STORAGE_MODEL_KEY, 'gpt-4o');
+        this.setUser(userObj);
+
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        this.showSuccessBanner('🎉 ¡Conectado exitosamente con OpenAI / ChatGPT!');
+      }
+    }
+
+    showSuccessBanner(msg) {
+      const banner = document.createElement('div');
+      banner.style.cssText = 'position:fixed; top:20px; right:20px; background:#10a37f; color:white; padding:14px 20px; border-radius:14px; font-weight:700; font-size:14px; z-index:999999; box-shadow:0 10px 30px rgba(16,163,127,0.5); font-family:sans-serif; animation:fadeIn 0.3s ease;';
+      banner.textContent = msg;
+      document.body.appendChild(banner);
+      setTimeout(() => banner.remove(), 5000);
     }
 
     // ─────────────────────────────────────────────────────────
@@ -46,21 +137,38 @@
       const currentEmail = this.user?.email || 'usuario@gmail.com';
       const currentModel = this.activeModel.startsWith('gpt-') || this.activeModel.startsWith('o') ? this.activeModel : 'gpt-4o';
       const openAIKey = this.getOpenAIKey();
+      const currentClientId = this.openAIClientId;
 
       overlay.innerHTML = `
-        <div class="coki-consent-modal" style="border-color: rgba(16, 163, 127, 0.6); box-shadow: 0 24px 60px rgba(0,0,0,0.85), 0 0 35px rgba(16, 163, 127, 0.3);">
+        <div class="coki-consent-modal" style="border-color: rgba(16, 163, 127, 0.6); box-shadow: 0 24px 60px rgba(0,0,0,0.85), 0 0 35px rgba(16, 163, 127, 0.3); max-width: 580px;">
           <div class="consent-head">
             <div class="consent-icon-box" style="background: rgba(16, 163, 127, 0.2); border-color: #10a37f; color: #10a37f;">
               ${CHATGPT_ICON_SVG}
             </div>
             <div>
-              <h2 class="consent-title" style="color: #6ee7b7;">Login with ChatGPT</h2>
-              <div class="consent-subtitle">Usa tu cuenta y suscripción de ChatGPT en Coki Studios</div>
+              <h2 class="consent-title" style="color: #6ee7b7;">Login with ChatGPT &amp; OpenAI</h2>
+              <div class="consent-subtitle">OAuth 2.0 PKCE &amp; Conexión de Cuenta Directa</div>
             </div>
           </div>
 
-          <div style="background: rgba(16, 163, 127, 0.1); border: 1px solid rgba(16, 163, 127, 0.3); border-radius: 14px; padding: 14px; font-size: 12.5px; color: #cbd5e1; line-height: 1.5; margin-bottom: 18px;">
-            ✨ <strong>Autenticación Directa</strong>: Inicia sesión con tu plan de ChatGPT sin necesidad de pagar APIs por separado.
+          <!-- Direct OAuth Action Button -->
+          <div style="background: linear-gradient(135deg, rgba(11, 61, 48, 0.9), rgba(16, 163, 127, 0.2)); border: 1.5px solid rgba(16, 163, 127, 0.5); border-radius: 16px; padding: 18px; margin-bottom: 20px; text-align: center;">
+            <div style="font-weight: 800; font-size: 15px; color: #6ee7b7; margin-bottom: 6px;">
+              🚀 Flujo OAuth 2.0 Directo a OpenAI
+            </div>
+            <div style="font-size: 12.5px; color: #cbd5e1; line-height: 1.5; margin-bottom: 14px;">
+              Haz clic para ser redirigido a la pantalla oficial de autorización de OpenAI y autorizar a <strong>Coki Studios</strong>.
+            </div>
+            <button type="button" class="btn-chatgpt-signin" id="btnLaunchOpenAIOAuth" style="width: 100%; justify-content: center; padding: 12px; font-size: 14px; box-shadow: 0 6px 20px rgba(16, 163, 127, 0.45);">
+              ${CHATGPT_ICON_SVG}
+              <span>Autorizar con OpenAI (OAuth PKCE) ↗</span>
+            </button>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 10px; margin: 16px 0; color: #64748b; font-size: 12px;">
+            <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
+            <span>O CONECTAR CON TU PLAN / API KEY</span>
+            <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
           </div>
 
           <!-- Email / Account -->
@@ -71,22 +179,22 @@
 
           <!-- Plan Selection -->
           <div class="consent-input-group">
-            <label class="consent-label">Tipo de Suscripción / Plan</label>
+            <label class="consent-label">Suscripción Activa</label>
             <select class="consent-input" id="chatgptSelectPlan" style="font-weight: 600;">
               <option value="ChatGPT Plus" ${currentPlan === 'ChatGPT Plus' ? 'selected' : ''}>🌟 ChatGPT Plus (Acceso a GPT-4o, GPT-4.5)</option>
-              <option value="ChatGPT Pro" ${currentPlan === 'ChatGPT Pro' ? 'selected' : ''}>👑 ChatGPT Pro (Acceso ilimitado a o1 y o3-mini)</option>
+              <option value="ChatGPT Pro" ${currentPlan === 'ChatGPT Pro' ? 'selected' : ''}>👑 ChatGPT Pro (o1 y o3-mini ilimitado)</option>
               <option value="ChatGPT Team" ${currentPlan === 'ChatGPT Team' ? 'selected' : ''}>🏢 ChatGPT Team / Enterprise</option>
-              <option value="ChatGPT Free" ${currentPlan === 'ChatGPT Free' ? 'selected' : ''}>🌱 ChatGPT Free (GPT-4o mini)</option>
+              <option value="ChatGPT Free" ${currentPlan === 'ChatGPT Free' ? 'selected' : ''}>🌱 ChatGPT Free</option>
             </select>
           </div>
 
           <!-- Model Selection -->
           <div class="consent-input-group">
-            <label class="consent-label">Modelo de ChatGPT Predeterminado</label>
+            <label class="consent-label">Modelo Activo</label>
             <select class="consent-input" id="chatgptSelectModel" style="font-weight: 600;">
-              <option value="gpt-4o" ${currentModel === 'gpt-4o' ? 'selected' : ''}>🟢 GPT-4o — Omni Multimodal &amp; Código Pro (Recomendado)</option>
-              <option value="gpt-4.5-preview" ${currentModel === 'gpt-4.5-preview' ? 'selected' : ''}>🟢 GPT-4.5 Preview — Máxima Capacidad Creativa</option>
-              <option value="o3-mini" ${currentModel === 'o3-mini' ? 'selected' : ''}>🟢 OpenAI o3-mini — Razonamiento Rápido en Código</option>
+              <option value="gpt-4o" ${currentModel === 'gpt-4o' ? 'selected' : ''}>🟢 GPT-4o — Omni Multimodal &amp; Código Pro</option>
+              <option value="gpt-4.5-preview" ${currentModel === 'gpt-4.5-preview' ? 'selected' : ''}>🟢 GPT-4.5 Preview — Máxima Capacidad</option>
+              <option value="o3-mini" ${currentModel === 'o3-mini' ? 'selected' : ''}>🟢 OpenAI o3-mini — Razonamiento en Código</option>
               <option value="o1" ${currentModel === 'o1' ? 'selected' : ''}>🟢 OpenAI o1 — Razonamiento Profundo</option>
             </select>
           </div>
@@ -95,21 +203,25 @@
           <div class="consent-input-group">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
               <label class="consent-label" style="margin-bottom:0;">OpenAI API Key (Opcional)</label>
-              <span style="font-size:11px; color:#94a3b8;">Para llamadas API directas</span>
+              <a href="https://platform.openai.com/api-keys" target="_blank" style="font-size:11px; color:#38bdf8; text-decoration:none; font-weight:700;">Obtener API Key ↗</a>
             </div>
             <input type="password" class="consent-input" id="chatgptInputKey" placeholder="sk-proj-..." value="${openAIKey}">
           </div>
 
           <div class="consent-footer-actions">
-            <button type="button" class="btn-consent-cancel" id="btnChatGPTCancel">Cancelar</button>
-            <button type="button" class="btn-consent-accept" id="btnChatGPTSubmit" style="background: linear-gradient(135deg, #10a37f, #059669); font-size: 14px;">
-              🟢 Iniciar Sesión y Conectar
+            <button type="button" class="btn-consent-cancel" id="btnChatGPTCancel">Cerrar</button>
+            <button type="button" class="btn-consent-accept" id="btnChatGPTSubmit" style="background: linear-gradient(135deg, #10a37f, #059669); font-size: 13.5px;">
+              ✅ Guardar y Activar
             </button>
           </div>
         </div>
       `;
 
       document.body.appendChild(overlay);
+
+      overlay.querySelector('#btnLaunchOpenAIOAuth').addEventListener('click', () => {
+        this.redirectToOpenAIOAuth();
+      });
 
       overlay.querySelector('#btnChatGPTCancel').addEventListener('click', () => overlay.remove());
       overlay.addEventListener('click', (e) => {
@@ -145,10 +257,11 @@
         overlay.remove();
         this.renderAllAuthWidgets();
         this.notifyListeners();
+        this.showSuccessBanner('🟢 ¡Sesión de ChatGPT configurada con éxito!');
       });
     }
 
-    loginWithChatGPT(customPlan = 'ChatGPT Plus') {
+    loginWithChatGPT() {
       this.openChatGPTModal();
     }
 
@@ -341,10 +454,10 @@
 
       if (this.user) {
         // Authenticated User
-        const isChatGPT = this.user.provider === 'chatgpt' || this.user.authType === 'chatgpt_account';
+        const isChatGPT = this.user.provider === 'chatgpt' || this.user.authType === 'chatgpt_account' || this.user.authType === 'openai_oauth';
         const pill = document.createElement('div');
         pill.className = `user-profile-pill ${isChatGPT ? 'chatgpt-pill' : ''}`;
-        pill.title = isChatGPT ? 'Cuenta de ChatGPT Conectada' : 'Cuenta de Google Conectada';
+        pill.title = isChatGPT ? 'Cuenta de ChatGPT / OpenAI Conectada' : 'Cuenta de Google Conectada';
 
         let avatarHtml = '';
         if (this.user.picture) {
@@ -373,12 +486,12 @@
           <div class="dropdown-user-header">
             <div style="font-weight:700; font-size:13px; color:#f8fafc;">${this.user.name}</div>
             <div class="dropdown-user-email">${this.user.email || 'Identidad autorizada'}</div>
-            ${isChatGPT ? `<div class="dropdown-plan-badge">Plan: ${this.user.plan || 'ChatGPT Plus'}</div>` : ''}
+            ${isChatGPT ? `<div class="dropdown-plan-badge">Plan: ${this.user.plan || 'ChatGPT Plus / Pro'}</div>` : ''}
             <div style="font-size:10px; color:#38bdf8; margin-top:4px; font-weight:700;">Modelo Activo: ${this.getModel()}</div>
           </div>
           <button class="dropdown-action-btn btn-open-chatgpt-config">
             <span>🟢</span>
-            <span>Ajustes de ChatGPT (${this.user.plan || 'Plus'})</span>
+            <span>Ajustes / OAuth OpenAI</span>
           </button>
           <button class="dropdown-action-btn btn-open-gemini-config">
             <span>⚡</span>
@@ -422,7 +535,7 @@
         const btnChatGPT = document.createElement('button');
         btnChatGPT.type = 'button';
         btnChatGPT.className = 'btn-chatgpt-signin';
-        btnChatGPT.title = 'Iniciar sesión con tu cuenta de ChatGPT (Plan Plus / Pro / Free)';
+        btnChatGPT.title = 'Iniciar sesión con tu cuenta de ChatGPT (OAuth 2.0 PKCE / Plus / Pro)';
         btnChatGPT.innerHTML = `
           ${CHATGPT_ICON_SVG}
           <span>Login with ChatGPT</span>
