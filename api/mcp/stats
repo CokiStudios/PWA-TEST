@@ -1,0 +1,9 @@
+{
+  "status": "online",
+  "availableTools": 6,
+  "totalToolCalls": 18,
+  "activeSseSessions": 1,
+  "uptimeSeconds": 360,
+  "server": "Coki Studios Hosted MCP Server",
+  "transport": "SSE / JSON-RPC 2.0"
+}

@@ -1,0 +1,24 @@
+{
+  "tools": [
+    {
+      "name": "generate_native_scaffold",
+      "description": "Genera estructuras y plantillas para SwiftUI, Jetpack Compose o React 19.",
+      "parameters": { "type": "object", "properties": { "platform": { "type": "string" }, "componentName": { "type": "string" } } }
+    },
+    {
+      "name": "validate_code_syntax",
+      "description": "Valida la sintaxis y tipos en proyectos TypeScript, JavaScript y Python.",
+      "parameters": { "type": "object", "properties": { "code": { "type": "string" }, "language": { "type": "string" } } }
+    },
+    {
+      "name": "organize_daily_135",
+      "description": "Aplica la regla de productividad 1-3-5 para jerarquizar tareas del día.",
+      "parameters": { "type": "object", "properties": { "tasks": { "type": "array" } } }
+    },
+    {
+      "name": "query_gemini_knowledge",
+      "description": "Consulta la base de conocimientos y memoria local de Coki Studios.",
+      "parameters": { "type": "object", "properties": { "query": { "type": "string" } } }
+    }
+  ]
+}
