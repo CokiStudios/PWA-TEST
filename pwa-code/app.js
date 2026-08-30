@@ -109,7 +109,7 @@ Always write complete, production-grade code with no placeholders. Format code c
 
   function setupPWA() {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/pwa-code/sw.js')
+      navigator.serviceWorker.register('sw.js')
         .then(() => console.log('[PWA] Service Worker registered'))
         .catch(err => console.error('[PWA] SW registration failed:', err));
     }

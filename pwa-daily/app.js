@@ -108,7 +108,7 @@ Comunícate siempre en un tono cálido, inspirador, estructurado y profesional e
 
   function setupPWA() {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/pwa-daily/sw.js')
+      navigator.serviceWorker.register('sw.js')
         .then(() => console.log('[DayFlow PWA] SW registered'))
         .catch(err => console.error('[DayFlow PWA] SW failed:', err));
     }

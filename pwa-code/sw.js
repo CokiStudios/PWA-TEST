@@ -1,20 +1,20 @@
 // Coki Gemini Code Pro Service Worker (Network-First Strategy)
-const CACHE_NAME = 'coki-code-mcp-v4-live';
+const CACHE_NAME = 'coki-code-mcp-v5-universal';
 const STATIC_ASSETS = [
-  '/pwa-code/',
-  '/pwa-code/index.html',
-  '/pwa-code/style.css',
-  '/pwa-code/app.js',
-  '/pwa-code/manifest.json',
-  '/assets/auth.css',
-  '/assets/google-auth.js',
-  '/assets/icon-code.svg'
+  './',
+  'index.html',
+  'style.css',
+  'app.js',
+  'manifest.json',
+  '../assets/auth.css',
+  '../assets/google-auth.js',
+  '../assets/icon-code.svg'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
+      return cache.addAll(STATIC_ASSETS).catch((e) => console.log('[SW] Cache addAll note:', e));
     }).then(() => self.skipWaiting())
   );
 });
@@ -38,8 +38,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   
-  // Never cache API or MCP streaming requests
-  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/mcp/')) {
+  // Never cache API or external generative language API calls
+  if (url.pathname.includes('/api/') || url.pathname.includes('/mcp/') || url.hostname.includes('googleapis.com')) {
     event.respondWith(fetch(event.request));
     return;
   }
@@ -59,7 +59,7 @@ self.addEventListener('fetch', (event) => {
         return caches.match(event.request).then((cached) => {
           if (cached) return cached;
           if (event.request.headers.get('accept')?.includes('text/html')) {
-            return caches.match('/pwa-code/index.html');
+            return caches.match('index.html');
           }
         });
       })

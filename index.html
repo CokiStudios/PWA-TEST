@@ -6,13 +6,13 @@
   <title>Coki Studios — Gemini PWA Suite &amp; Hosted MCP Server</title>
   <meta name="description" content="Ecosistema unificado de aplicaciones PWA con Gemini AI y Hosted MCP Server de Coki Studios. Code Pro y DayFlow.">
   <meta name="theme-color" content="#06090f">
-  <link rel="icon" type="image/svg+xml" href="/assets/icon-code.svg">
+  <link rel="icon" type="image/svg+xml" href="assets/icon-code.svg">
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="/assets/auth.css">
+  <link rel="stylesheet" href="assets/auth.css">
   <style>
     :root {
       --bg-dark: #06090f;
@@ -520,7 +520,7 @@
 
   <!-- Header -->
   <header>
-    <a href="/" class="brand">
+    <a href="./" class="brand">
       <div class="brand-logo-stack">
         <div class="brand-icon-1">⚡</div>
         <div class="brand-icon-2">☀️</div>
@@ -590,7 +590,7 @@
         </li>
       </ul>
 
-      <a href="/pwa-code/" class="btn-launch btn-launch-code">
+      <a href="pwa-code/" class="btn-launch btn-launch-code">
         <span>Abrir Gemini Code Pro</span>
         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 12h14M12 5l7 7-7 7"/></svg>
       </a>
@@ -627,7 +627,7 @@
         </li>
       </ul>
 
-      <a href="/pwa-daily/" class="btn-launch btn-launch-daily">
+      <a href="pwa-daily/" class="btn-launch btn-launch-daily">
         <span>Abrir Gemini DayFlow</span>
         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 12h14M12 5l7 7-7 7"/></svg>
       </a>
@@ -742,11 +742,11 @@
   <!-- Footer -->
   <footer>
     <div class="footer-links">
-      <a href="/pwa-code/" class="footer-link">Gemini Code Pro</a>
+      <a href="pwa-code/" class="footer-link">Gemini Code Pro</a>
       <span>·</span>
-      <a href="/pwa-daily/" class="footer-link">Gemini DayFlow</a>
+      <a href="pwa-daily/" class="footer-link">Gemini DayFlow</a>
       <span>·</span>
-      <a href="/mcp/sse" class="footer-link">Hosted MCP Server (SSE)</a>
+      <a href="mcp/sse" class="footer-link">Hosted MCP Server (SSE)</a>
       <span>·</span>
       <a href="https://cokistudios.com" target="_blank" class="footer-link">cokistudios.com</a>
     </div>
@@ -757,7 +757,7 @@
     // Live MCP Metrics Fetcher
     async function updateMcpLiveStats() {
       try {
-        const res = await fetch('/api/mcp/stats');
+        const res = await fetch('api/mcp/stats');
         if (res.ok) {
           const stats = await res.json();
           document.getElementById('statsToolsCount').textContent = stats.availableTools || 6;
@@ -773,6 +773,7 @@
 
     updateMcpLiveStats();
     setInterval(updateMcpLiveStats, 8000);
-  <script src="/assets/google-auth.js"></script>
+  </script>
+  <script src="assets/google-auth.js"></script>
 </body>
 </html>

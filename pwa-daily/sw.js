@@ -1,20 +1,20 @@
 // Coki Gemini DayFlow Service Worker (Network-First Strategy)
-const CACHE_NAME = 'coki-daily-flow-v4-live';
+const CACHE_NAME = 'coki-daily-flow-v5-universal';
 const STATIC_ASSETS = [
-  '/pwa-daily/',
-  '/pwa-daily/index.html',
-  '/pwa-daily/style.css',
-  '/pwa-daily/app.js',
-  '/pwa-daily/manifest.json',
-  '/assets/auth.css',
-  '/assets/google-auth.js',
-  '/assets/icon-daily.svg'
+  './',
+  'index.html',
+  'style.css',
+  'app.js',
+  'manifest.json',
+  '../assets/auth.css',
+  '../assets/google-auth.js',
+  '../assets/icon-daily.svg'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
+      return cache.addAll(STATIC_ASSETS).catch((e) => console.log('[SW] Cache addAll note:', e));
     }).then(() => self.skipWaiting())
   );
 });
@@ -38,8 +38,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   
-  // Never cache API requests
-  if (url.pathname.startsWith('/api/')) {
+  // Never cache API or external generative language API calls
+  if (url.pathname.includes('/api/') || url.pathname.includes('/mcp/') || url.hostname.includes('googleapis.com')) {
     event.respondWith(fetch(event.request));
     return;
   }
@@ -59,7 +59,7 @@ self.addEventListener('fetch', (event) => {
         return caches.match(event.request).then((cached) => {
           if (cached) return cached;
           if (event.request.headers.get('accept')?.includes('text/html')) {
-            return caches.match('/pwa-daily/index.html');
+            return caches.match('index.html');
           }
         });
       })
